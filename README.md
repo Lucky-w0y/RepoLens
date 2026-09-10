@@ -1,6 +1,6 @@
 # RepoLens
 
-This is the replication package for ISSTA submission #856, titled *From Concepts to Clues: Abstracting Conceptual Knowledge for Issue Localization in Software Repositories*.
+This is the replication package for *From Concepts to Clues: Abstracting Conceptual Knowledge for Issue Localization in Software Repositories*.
 
 ## Description of each folder
 
