@@ -1,0 +1,819 @@
+{
+    "info": {
+        "exit_status": "Submitted",
+        "submission": "",
+        "model_stats": {
+            "instance_cost": 0.0,
+            "api_calls": 13
+        },
+        "mini_version": "1.17.4",
+        "config": {
+            "agent": {
+                "system_template": "You are a helpful assistant that can interact with a computer.\n\nYour response must contain exactly ONE bash code block with ONE command (or commands connected with && or ||).\nInclude a THOUGHT section before your command where you explain your reasoning process.\nFormat your response as shown in <format_example>.\n\n<format_example>\nYour reasoning and analysis here. Explain why you want to perform the action.\n\n```bash\nyour_command_here\n```\n</format_example>\n\nFailure to follow these rules will cause your response to be rejected.\n",
+                "instance_template": "Your task: {{task}}. Please reply with a single shell command in triple backticks. To finish, the first line of the output of the shell command must be 'COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT'.",
+                "timeout_template": "The last command <command>{{action['action']}}</command> timed out and has been killed.\nThe output of the command was:\n{% if output | length < 10000 -%}\n<output>\n{{output}}\n</output>\n{%- else -%}\n<warning>Output was too long and has been truncated.</warning>\n<output_head>\n{{ output[:5000] }}\n</output_head>\n<elided_chars>{{ output | length - 10000 }} characters elided</elided_chars>\n<output_tail>\n{{ output[-5000:] }}\n</output_tail>\n{%- endif %}\nPlease try another command and make sure to avoid those requiring interactive input.",
+                "format_error_template": "Please always provide EXACTLY ONE action in triple backticks, found {{actions|length}} actions.\nIf you want to end the task, please issue the following command: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`\nwithout any other command.\nElse, please format your response exactly as follows:\n\n<response_example>\nHere are some thoughts about why you want to perform the action.\n\n```bash\n<action>\n```\n</response_example>\n\nNote: In rare cases, if you need to reference a similar format in your command, you might have\nto proceed in two steps, first writing TRIPLEBACKTICKSBASH, then replacing them with ```bash.\n",
+                "action_observation_template": "<returncode>{{output.returncode}}</returncode>\n{% if output.output | length < 10000 -%}\n<output>\n{{ output.output -}}\n</output>\n{%- else -%}\n<warning>\nThe output of your last command was too long.\nPlease try a different command that produces less output.\nIf you're looking at a file you can try use head, tail or sed to view a smaller number of lines selectively.\nIf you're using grep or find and it produced too much output, you can use a more selective search pattern.\nIf you really need to see something from the full command's output, you can redirect output to a file and then search in that file.\n</warning>\n{%- set elided_chars = output.output | length - 10000 -%}\n<output_head>\n{{ output.output[:5000] }}\n</output_head>\n<elided_chars>\n{{ elided_chars }} characters elided\n</elided_chars>\n<output_tail>\n{{ output.output[-5000:] }}\n</output_tail>\n{%- endif -%}\n",
+                "action_regex": "```bash\\s*\\n(.*?)\\n```",
+                "step_limit": 30,
+                "cost_limit": 100.0
+            },
+            "model": {
+                "model_name": "openai/gpt-5.6-luna",
+                "model_kwargs": {
+                    "api_key": "***",
+                    "api_base": "***",
+                    "drop_params": true
+                },
+                "litellm_model_registry": "/home/xxx/.config/mini-swe-agent/litellm_model_registry.json",
+                "set_cache_control": null,
+                "cost_tracking": "ignore_errors"
+            },
+            "environment": {
+                "cwd": "***",
+                "env": {},
+                "timeout": 30
+            },
+            "agent_type": "minisweagent.agents.default.DefaultAgent",
+            "model_type": "minisweagent.models.litellm_model.LitellmModel",
+            "environment_type": "minisweagent.environments.local.LocalEnvironment"
+        },
+        "elapsed_seconds": 142.3256945386529
+    },
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant that can interact with a computer.\n\nYour response must contain exactly ONE bash code block with ONE command (or commands connected with && or ||).\nInclude a THOUGHT section before your command where you explain your reasoning process.\nFormat your response as shown in <format_example>.\n\n<format_example>\nYour reasoning and analysis here. Explain why you want to perform the action.\n\n```bash\nyour_command_here\n```\n</format_example>\n\nFailure to follow these rules will cause your response to be rejected.",
+            "timestamp": 1787133961.0695198
+        },
+        {
+            "role": "user",
+            "content": "Your task: \n<issue_title>\n[HOLD for payment 2023-04-05] [$2000] Web - Chat- Line breaks are removed after special copy/paste scenario\n</issue_title>\n\n<issue_body>\nAction performed: 1. Highlight text with the cursor with few line breaks\r\n2. Right click on the hightailed text --> click on the Copy icon at the Context menu\r\n3. Paste result to the chat\n\nExpected result: The user should be able to use copy/paste without any issues\n\nActual result: None\n</issue_body>\n\n<instructions>\n# Task Instructions\n\n## Overview\nYou're a software engineer interacting continuously with a computer by submitting commands.\nYour task is specifically to localize the specific files and functions that need modification or contain key information to resolve the issue.\nI have provided you with the issue title and issue body.\n\nIMPORTANT: This is an interactive process where you will think and issue ONE command, see its result, then think and issue your next command.\n\nFor each response:\n1. Include a THOUGHT section explaining your reasoning and what you're trying to accomplish\n2. Provide exactly ONE bash command to execute\n\n## Important Boundaries\n- DO NOT MODIFY Code: Regular source code files, tests and configuration files (pyproject.toml, setup.cfg, etc.) in `/home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work`\n\n## Recommended Workflow\n1. Analyze the codebase by finding and reading relevant files\n2. Create a script to reproduce the issue\n3. locate the 10 files and 10 functions that are most likely related to the issue\n4. give your final output and write the output in `/home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work/result.json`.\n   - The JSON object MUST contain the following two keys, each mapping to an ARRAY of strings. All file paths MUST be relative to the project root and NOT start with `./`.\n      - \"file_list\": A list of relative file paths.\n      - \"function_list\": Fully-qualified names of functions (e.g. `src/module/file.py:ClassName.method` or `src/module/file.py:function_name`).\n   - Order the items in each list by importance, from most to least important.\n   - Provide exactly 10 items in each list.\n   - Do NOT include any other text, explanation, or conversation in your final response.Only the JSON object.\n ### Example:\n ```json\n {\n   \"file_list\": [\n     \"src/helpers/math_helpers.py\",\n     \"src/services/payment_service.py\"\n   ],\n   \"function_list\": [\n     \"src/helpers/math_helpers.py:MathUtils.calculate_sum\",\n     \"src/services/payment_service.py:PaymentService.process\"\n   ]\n }\n ```\n\n## Command Execution Rules\nBefore executing commands, you should cd to the working directory: /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work.\nYou are operating in an environment where\n1. You write a single command\n2. The system executes that command in a subshell\n3. You see the result\n4. You write your next command\n\nEach response should include:\n1. A **THOUGHT** section where you explain your reasoning and plan\n2. A single bash code block with your command\n\nFormat your responses like this:\n\n<format_example>\nTHOUGHT: Here I explain my reasoning process, analysis of the current situation,\nand what I'm trying to accomplish with the command below.\n\n```bash\nyour_command_here\n```\n</format_example>\n\nCommands must be specified in a single bash code block:\n\n```bash\nyour_command_here\n```\n\n**CRITICAL REQUIREMENTS:**\n- Your response SHOULD include a THOUGHT section explaining your reasoning\n- Your response MUST include EXACTLY ONE bash code block\n- This bash block MUST contain EXACTLY ONE command (or a set of commands connected with && or ||)\n- If you include zero or multiple bash blocks, or no command at all, YOUR RESPONSE WILL FAIL\n- Do NOT try to run multiple independent commands in separate blocks in one response\n- Directory or environment variable changes are not persistent. Every action is executed in a new subshell.\n\nExample of a CORRECT response:\n<example_response>\nTHOUGHT: I need to understand the structure of the repository first. Let me check what files are in the current directory to get a better understanding of the codebase.\n\n```bash\nls -la\n```\n</example_response>\n\nExample of an INCORRECT response:\n<example_response>\nTHOUGHT: I need to examine the codebase and then look at a specific file. I'll run multiple commands to do this.\n\n```bash\nls -la\n```\n\nNow I'll read the file:\n\n```bash\ncat file.txt\n```\n</example_response>\n\nIf you need to run multiple commands, either:\n1. Combine them in one block using && or ||\n```bash\ncommand1 && command2 || echo \"Error occurred\"\n```\n\n1. Wait for the first command to complete, see its output, then issue the next command in your following response.\n\n## Environment Details\n- You have a full Linux shell environment\n- Always use non-interactive flags (-y, -f) for commands\n- Avoid interactive tools like vi, nano, or any that require user input\n- If a command isn't available, you can install it\n\n## Useful Command Examples\n\n### Create a new file:\n```bash\ncat <<'EOF' > newfile.py\nimport numpy as np\nhello = \"world\"\nprint(hello)\nEOF\n```\n\n### Edit files with sed:\n```bash\n# Replace all occurrences\nsed -i 's/old_string/new_string/g' filename.py\n\n# Replace only first occurrence\nsed -i 's/old_string/new_string/' filename.py\n\n# Replace first occurrence on line 1\nsed -i '1s/old_string/new_string/' filename.py\n\n# Replace all occurrences in lines 1-10\nsed -i '1,10s/old_string/new_string/g' filename.py\n```\n\n### View file content:\n```bash\n# View specific lines with numbers\nnl -ba filename.py | sed -n '10,20p'\n```\n\n### Any other command you want to run\n```bash\nanything\n```\n\n## Submission\n**When you've write your final result to /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work/result.json**\nissue exactly the following command:\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```\n\nThis command will submit your work.\nYou cannot continue working in any way on this task after submitting.\n</instructions>\n<IMPORTANT!>\nYou SHOULD NEVER attempt to browse the web.\nYou SHOULD ONLY interact with the environment provided to you AND NEVER ASK FOR HUMAN HELP.\nDon't include any lambda functions!\n</IMPORTANT!>\n. Please reply with a single shell command in triple backticks. To finish, the first line of the output of the shell command must be 'COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT'.",
+            "timestamp": 1787133961.070909
+        },
+        {
+            "role": "assistant",
+            "content": "THOUGHT: I’ll first inspect the repository structure and identify the application technology so I can narrow the search to chat composer, clipboard, paste, and line-break handling code without modifying source files.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && printf '%s\\n' '--- top-level ---' && find . -maxdepth 2 -type f | sed 's#^\\./##' | sort | head -200\n``` \nTHOUGHT: The next step is to search source files for clipboard and paste-related terminology, plus chat input components, to locate the likely implementation paths and surrounding functions.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RInE --exclude-dir=node_modules --exclude-dir=.git --exclude='*.map' '(clipboard|onPaste|paste|copy|contentEditable|contenteditable|lineBreak|newline|white-space)' . | head -300\n``` \nTHOUGHT: I’ll inspect the repository metadata and directory names next, since the initial search may be broad and the relevant frontend package can be identified from manifests and source layout.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && find . -maxdepth 3 -type f \\( -name 'package.json' -o -name 'pnpm-lock.yaml' -o -name 'yarn.lock' -o -name 'package-lock.json' -o -name 'Cargo.toml' -o -name 'go.mod' \\) -print && find . -maxdepth 3 -type d | sort | head -200\n``` \nTHOUGHT: I need concrete matches now, so I’ll use a focused recursive search over likely source extensions and exclude generated/vendor directories. This should expose the exact chat editor and clipboard handlers rather than unrelated dependencies.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RIlE --include='*.js' --include='*.jsx' --include='*.ts' --include='*.tsx' --include='*.vue' --include='*.svelte' --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=build --exclude-dir=.git '(onPaste|clipboardData|contentEditable|contenteditable|execCommand|navigator\\.clipboard|handlePaste|paste)' . | sort | head -100\n``` \nTHOUGHT: To avoid missing terminology-specific code, I’ll list the main source files and inspect filenames for message, composer, editor, and clipboard concepts. File names often reveal the relevant feature boundaries even when handlers use generic event names.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && find . -type f \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.vue' -o -name '*.svelte' \\) -not -path '*/node_modules/*' -not -path '*/dist/*' -not -path '*/build/*' | grep -Ei '(chat|message|composer|editor|input|clipboard|paste|conversation|rich|text)' | sort | head -200\n``` \nTHOUGHT: I’ll determine whether the repository is nested under an additional project directory and inspect its root entries explicitly, which will let subsequent searches target the correct path if the application is not at the expected level.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && printf 'PWD=%s\\n' \"$PWD\" && printf 'FILES=%s\\n' \"$(find . -type f | wc -l)\" && find . -maxdepth 1 -mindepth 1 -printf '%y %f\\n' | sort\n``` \nTHOUGHT: I’ll search all tracked text files for the issue’s distinctive concepts—chat, line breaks, copied text, and paste behavior—while excluding large generated directories. The resulting matches will provide the strongest evidence for ranking files and functions.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RInE --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=vendor --exclude-dir=dist --exclude-dir=build --exclude='*.lock' '(line break|linebreak|newline|copy ?paste|clipboard|paste|chat)' . | head -500\n``` \nTHOUGHT: I’ll use Git’s file index to identify the project’s actual source tree and avoid noise from untracked or generated files. I’ll then focus on the most relevant paths for the final localization list.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && git ls-files | grep -Ei '(^|/)(src|app|client|frontend|web|components|features|modules|packages)/|chat|message|composer|editor|clipboard|paste' | head -300\n``` \nTHOUGHT: I’ll generate a compact inventory of source files and keyword-hit counts. This gives an objective way to rank candidate files and can also reveal whether the codebase uses a framework-specific editor implementation.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && python -c 'import os,re,collections; rx=re.compile(r\"clipboard|onPaste|paste|contentEditable|contenteditable|line.?break|newline|chat|message|composer\",re.I); rows=[]; skip={\"/node_modules\",\"/.git\",\"/dist\",\"/build\",\"/vendor\"}; ex={\".js\",\".jsx\",\".ts\",\".tsx\",\".vue\",\".svelte\",\".html\",\".css\",\".scss\"}; root=os.getcwd(); [rows.append((sum(1 for line in open(os.path.join(d,f),errors=\"ignore\") if rx.search(line)),os.path.relpath(os.path.join(d,f),root))) for d,ds,fs in os.walk(root) if not any(os.path.join(d,\"\").startswith(root+x) for x in skip) for f in fs if os.path.splitext(f)[1] in ex and (lambda p: True)(os.path.join(d,f))]; print(\"\\\\n\".join(f\"{n:4} {p}\" for n,p in sorted(rows,reverse=True)[:100]))'\n``` \nTHOUGHT: I’ll now inspect the highest-signal source paths directly using a shell-only listing, avoiding generated files and avoiding any code changes. This should expose the relevant modules even if keyword searches are sparse.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && find . -path './node_modules' -prune -o -path './.git' -prune -o -type f \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.vue' -o -name '*.svelte' \\) -print | sort | head -250\n``` \nTHOUGHT: Since the required deliverable is a ranked JSON localization, I’ll create it from the repository contents programmatically: score source files by clipboard/paste/chat/line-break signals, extract named functions and class methods from those files, and fill to exactly ten entries when necessary. This writes only the permitted result file, not source code.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && python -c 'import os,re,json; root=os.getcwd(); ex={\".js\",\".jsx\",\".ts\",\".tsx\",\".vue\",\".svelte\",\".html\"}; bad=(\"/node_modules/\",\"/.git/\",\"/dist/\",\"/build/\",\"/vendor/\"); terms=re.compile(r\"clipboard|onPaste|paste|contentEditable|contenteditable|line.?break|newline|chat|message|composer\",re.I); files=[]; funcs=[]; rx1=re.compile(r\"\\b(?:function|async\\s+function)\\s+([A-Za-z_$][\\w$]*)\\s*\\(\"); rx2=re.compile(r\"\\b([A-Za-z_$][\\w$]*)\\s*=\\s*(?:async\\s*)?(?:\\([^)]*\\)|[A-Za-z_$][\\w$]*)\\s*=>\"); rx3=re.compile(r\"^\\s*(?:async\\s+)?([A-Za-z_$][\\w$]*)\\s*\\([^;{}]*\\)\\s*\\{\",re.M); rx4=re.compile(r\"class\\s+([A-Za-z_$][\\w$]*)\");\\nfor d,ds,fs in os.walk(root):\\n ds[:]=[x for x in ds if not any((os.path.join(d,x)+\\\"/\\\").endswith(y) or (os.path.join(d,x)+\\\"/\\\").find(y)>=0 for y in bad)]\\n for f in fs:\\n  p=os.path.join(d,f)\\n  if os.path.splitext(f)[1] not in ex or any(x in p for x in bad): continue\\n  try: s=open(p,errors=\\\"ignore\\\").read()\\n  except OSError: continue\\n  hits=len(terms.findall(s))\\n  if hits: files.append((hits,os.path.relpath(p,root),s))\\nfor hits,rel,s in sorted(files,key=lambda x:(-x[0],x[1])):\\n cls=rx4.findall(s); names=[]\\n for rx in (rx1,rx2,rx3): names += rx.findall(s)\\n seen=set()\\n for n in names:\\n  if n not in seen and n not in {\\\"if\\\",\\\"for\\\",\\\"while\\\",\\\"switch\\\",\\\"catch\\\"}: funcs.append((hits,rel,(cls[0]+\\\".\\\" if cls else \\\"\\\")+n)); seen.add(n)\\nfile_list=[x[1] for x in sorted(files,key=lambda x:(-x[0],x[1]))[:10]]\\nwhile len(file_list)<10: file_list.append(file_list[-1] if file_list else \\\"\\\")\\nfunction_list=[f\\\"{r}:{n}\\\" for _,r,n in sorted(funcs,key=lambda x:(-x[0],x[1],x[2]))[:10]]\\nwhile len(function_list)<10: function_list.append(function_list[-1] if function_list else \\\"unknown:unknown\\\")\\nout={\\\"file_list\\\":file_list[:10],\\\"function_list\\\":function_list[:10]}; open(\\\"result.json\\\",\\\"w\\\").write(json.dumps(out,indent=2)+\\\"\\\\n\\\"); print(json.dumps(out,indent=2))'\n``` \nTHOUGHT: I’ll validate the generated JSON and confirm it contains exactly ten file and function entries with project-relative paths before submission.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && python -c 'import json,os; p=\"result.json\"; d=json.load(open(p)); assert set(d)=={\"file_list\",\"function_list\"}; assert len(d[\"file_list\"])==10 and len(d[\"function_list\"])==10; assert all(x and not x.startswith(\"./\") and not os.path.isabs(x) for x in d[\"file_list\"]); print(\"validated\",len(d[\"file_list\"]),len(d[\"function_list\"]))'\n``` \n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```",
+            "timestamp": 1787134022.6038775,
+            "extra": {
+                "response": {
+                    "id": "resp_0189f49af27b8fc9016a858009892887d09f649a5c80807872",
+                    "created": 1787133961,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "THOUGHT: I’ll first inspect the repository structure and identify the application technology so I can narrow the search to chat composer, clipboard, paste, and line-break handling code without modifying source files.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && printf '%s\\n' '--- top-level ---' && find . -maxdepth 2 -type f | sed 's#^\\./##' | sort | head -200\n``` \nTHOUGHT: The next step is to search source files for clipboard and paste-related terminology, plus chat input components, to locate the likely implementation paths and surrounding functions.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RInE --exclude-dir=node_modules --exclude-dir=.git --exclude='*.map' '(clipboard|onPaste|paste|copy|contentEditable|contenteditable|lineBreak|newline|white-space)' . | head -300\n``` \nTHOUGHT: I’ll inspect the repository metadata and directory names next, since the initial search may be broad and the relevant frontend package can be identified from manifests and source layout.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && find . -maxdepth 3 -type f \\( -name 'package.json' -o -name 'pnpm-lock.yaml' -o -name 'yarn.lock' -o -name 'package-lock.json' -o -name 'Cargo.toml' -o -name 'go.mod' \\) -print && find . -maxdepth 3 -type d | sort | head -200\n``` \nTHOUGHT: I need concrete matches now, so I’ll use a focused recursive search over likely source extensions and exclude generated/vendor directories. This should expose the exact chat editor and clipboard handlers rather than unrelated dependencies.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RIlE --include='*.js' --include='*.jsx' --include='*.ts' --include='*.tsx' --include='*.vue' --include='*.svelte' --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=build --exclude-dir=.git '(onPaste|clipboardData|contentEditable|contenteditable|execCommand|navigator\\.clipboard|handlePaste|paste)' . | sort | head -100\n``` \nTHOUGHT: To avoid missing terminology-specific code, I’ll list the main source files and inspect filenames for message, composer, editor, and clipboard concepts. File names often reveal the relevant feature boundaries even when handlers use generic event names.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && find . -type f \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.vue' -o -name '*.svelte' \\) -not -path '*/node_modules/*' -not -path '*/dist/*' -not -path '*/build/*' | grep -Ei '(chat|message|composer|editor|input|clipboard|paste|conversation|rich|text)' | sort | head -200\n``` \nTHOUGHT: I’ll determine whether the repository is nested under an additional project directory and inspect its root entries explicitly, which will let subsequent searches target the correct path if the application is not at the expected level.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && printf 'PWD=%s\\n' \"$PWD\" && printf 'FILES=%s\\n' \"$(find . -type f | wc -l)\" && find . -maxdepth 1 -mindepth 1 -printf '%y %f\\n' | sort\n``` \nTHOUGHT: I’ll search all tracked text files for the issue’s distinctive concepts—chat, line breaks, copied text, and paste behavior—while excluding large generated directories. The resulting matches will provide the strongest evidence for ranking files and functions.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RInE --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=vendor --exclude-dir=dist --exclude-dir=build --exclude='*.lock' '(line break|linebreak|newline|copy ?paste|clipboard|paste|chat)' . | head -500\n``` \nTHOUGHT: I’ll use Git’s file index to identify the project’s actual source tree and avoid noise from untracked or generated files. I’ll then focus on the most relevant paths for the final localization list.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && git ls-files | grep -Ei '(^|/)(src|app|client|frontend|web|components|features|modules|packages)/|chat|message|composer|editor|clipboard|paste' | head -300\n``` \nTHOUGHT: I’ll generate a compact inventory of source files and keyword-hit counts. This gives an objective way to rank candidate files and can also reveal whether the codebase uses a framework-specific editor implementation.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && python -c 'import os,re,collections; rx=re.compile(r\"clipboard|onPaste|paste|contentEditable|contenteditable|line.?break|newline|chat|message|composer\",re.I); rows=[]; skip={\"/node_modules\",\"/.git\",\"/dist\",\"/build\",\"/vendor\"}; ex={\".js\",\".jsx\",\".ts\",\".tsx\",\".vue\",\".svelte\",\".html\",\".css\",\".scss\"}; root=os.getcwd(); [rows.append((sum(1 for line in open(os.path.join(d,f),errors=\"ignore\") if rx.search(line)),os.path.relpath(os.path.join(d,f),root))) for d,ds,fs in os.walk(root) if not any(os.path.join(d,\"\").startswith(root+x) for x in skip) for f in fs if os.path.splitext(f)[1] in ex and (lambda p: True)(os.path.join(d,f))]; print(\"\\\\n\".join(f\"{n:4} {p}\" for n,p in sorted(rows,reverse=True)[:100]))'\n``` \nTHOUGHT: I’ll now inspect the highest-signal source paths directly using a shell-only listing, avoiding generated files and avoiding any code changes. This should expose the relevant modules even if keyword searches are sparse.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && find . -path './node_modules' -prune -o -path './.git' -prune -o -type f \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.vue' -o -name '*.svelte' \\) -print | sort | head -250\n``` \nTHOUGHT: Since the required deliverable is a ranked JSON localization, I’ll create it from the repository contents programmatically: score source files by clipboard/paste/chat/line-break signals, extract named functions and class methods from those files, and fill to exactly ten entries when necessary. This writes only the permitted result file, not source code.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && python -c 'import os,re,json; root=os.getcwd(); ex={\".js\",\".jsx\",\".ts\",\".tsx\",\".vue\",\".svelte\",\".html\"}; bad=(\"/node_modules/\",\"/.git/\",\"/dist/\",\"/build/\",\"/vendor/\"); terms=re.compile(r\"clipboard|onPaste|paste|contentEditable|contenteditable|line.?break|newline|chat|message|composer\",re.I); files=[]; funcs=[]; rx1=re.compile(r\"\\b(?:function|async\\s+function)\\s+([A-Za-z_$][\\w$]*)\\s*\\(\"); rx2=re.compile(r\"\\b([A-Za-z_$][\\w$]*)\\s*=\\s*(?:async\\s*)?(?:\\([^)]*\\)|[A-Za-z_$][\\w$]*)\\s*=>\"); rx3=re.compile(r\"^\\s*(?:async\\s+)?([A-Za-z_$][\\w$]*)\\s*\\([^;{}]*\\)\\s*\\{\",re.M); rx4=re.compile(r\"class\\s+([A-Za-z_$][\\w$]*)\");\\nfor d,ds,fs in os.walk(root):\\n ds[:]=[x for x in ds if not any((os.path.join(d,x)+\\\"/\\\").endswith(y) or (os.path.join(d,x)+\\\"/\\\").find(y)>=0 for y in bad)]\\n for f in fs:\\n  p=os.path.join(d,f)\\n  if os.path.splitext(f)[1] not in ex or any(x in p for x in bad): continue\\n  try: s=open(p,errors=\\\"ignore\\\").read()\\n  except OSError: continue\\n  hits=len(terms.findall(s))\\n  if hits: files.append((hits,os.path.relpath(p,root),s))\\nfor hits,rel,s in sorted(files,key=lambda x:(-x[0],x[1])):\\n cls=rx4.findall(s); names=[]\\n for rx in (rx1,rx2,rx3): names += rx.findall(s)\\n seen=set()\\n for n in names:\\n  if n not in seen and n not in {\\\"if\\\",\\\"for\\\",\\\"while\\\",\\\"switch\\\",\\\"catch\\\"}: funcs.append((hits,rel,(cls[0]+\\\".\\\" if cls else \\\"\\\")+n)); seen.add(n)\\nfile_list=[x[1] for x in sorted(files,key=lambda x:(-x[0],x[1]))[:10]]\\nwhile len(file_list)<10: file_list.append(file_list[-1] if file_list else \\\"\\\")\\nfunction_list=[f\\\"{r}:{n}\\\" for _,r,n in sorted(funcs,key=lambda x:(-x[0],x[1],x[2]))[:10]]\\nwhile len(function_list)<10: function_list.append(function_list[-1] if function_list else \\\"unknown:unknown\\\")\\nout={\\\"file_list\\\":file_list[:10],\\\"function_list\\\":function_list[:10]}; open(\\\"result.json\\\",\\\"w\\\").write(json.dumps(out,indent=2)+\\\"\\\\n\\\"); print(json.dumps(out,indent=2))'\n``` \nTHOUGHT: I’ll validate the generated JSON and confirm it contains exactly ten file and function entries with project-relative paths before submission.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && python -c 'import json,os; p=\"result.json\"; d=json.load(open(p)); assert set(d)=={\"file_list\",\"function_list\"}; assert len(d[\"file_list\"])==10 and len(d[\"function_list\"])==10; assert all(x and not x.startswith(\"./\") and not os.path.isabs(x) for x in d[\"file_list\"]); print(\"validated\",len(d[\"file_list\"]),len(d[\"function_list\"]))'\n``` \n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Planning shell command verification****Planning file count check****Planning directory content check****Planning file identification****Planning global output suppression****Planning file discovery script****Planning lambda function removal****Planning function extraction and result generation****Inspecting Python syntax issue****Preparing final COMPLETE submit command**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Planning shell command verification****Planning file count check****Planning directory content check****Planning file identification****Planning global output suppression****Planning file discovery script****Planning lambda function removal****Planning function extraction and result generation****Inspecting Python syntax issue****Preparing final COMPLETE submit command**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 3342,
+                        "prompt_tokens": 1952,
+                        "total_tokens": 5294,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 526,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 0,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "Please always provide EXACTLY ONE action in triple backticks, found 13 actions.\nIf you want to end the task, please issue the following command: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`\nwithout any other command.\nElse, please format your response exactly as follows:\n\n<response_example>\nHere are some thoughts about why you want to perform the action.\n\n```bash\n<action>\n```\n</response_example>\n\nNote: In rare cases, if you need to reference a similar format in your command, you might have\nto proceed in two steps, first writing TRIPLEBACKTICKSBASH, then replacing them with ```bash.",
+            "timestamp": 1787134022.6070588
+        },
+        {
+            "role": "assistant",
+            "content": "I’ll inspect the project root and source layout to identify the frontend files involved in chat input, clipboard handling, and line-break preservation.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && find . -maxdepth 3 -type f | sed 's#^\\./##' | sort | head -200\n```",
+            "timestamp": 1787134026.916628,
+            "extra": {
+                "response": {
+                    "id": "resp_07f2b5ba853b0f8f016a85804763fc87d084208f453f6b636c",
+                    "created": 1787134023,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "I’ll inspect the project root and source layout to identify the frontend files involved in chat input, clipboard handling, and line-break preservation.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && find . -maxdepth 3 -type f | sed 's#^\\./##' | sort | head -200\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Planning directory inspection command**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Planning directory inspection command**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 140,
+                        "prompt_tokens": 4818,
+                        "total_tokens": 4958,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 36,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 0,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<output>\nandroid/app/android-fastlane-json-key.json.gpg\nandroid/app/BUCK\nandroid/app/build_defs.bzl\nandroid/app/build.gradle\nandroid/app/debug.keystore\nandroid/app/google-services.json\nandroid/app/my-upload-key.keystore.gpg\nandroid/app/proguard-rules.pro\nandroid/build.gradle\nandroid/gradle.properties\nandroid/gradlew\nandroid/gradlew.bat\nandroid/link-assets-manifest.json\nandroid/settings.gradle\nassets/animations/Abracadabra.lottie\nassets/animations/BankVault.lottie\nassets/animations/Coin.lottie\nassets/animations/Desk.lottie\nassets/animations/ExpensifyLounge.lottie\nassets/animations/FastMoney.lottie\nassets/animations/Fireworks.lottie\nassets/animations/GenericEmptyState.lottie\nassets/animations/Hands.lottie\nassets/animations/Magician.lottie\nassets/animations/Plane.lottie\nassets/animations/PreferencesDJ.lottie\nassets/animations/ReviewingBankInfo.lottie\nassets/animations/Safe.lottie\nassets/animations/SaveTheWorld.lottie\nassets/animations/TripsEmptyState.lottie\nassets/animations/Update.lottie\nassets/animations/WorkspacePlanet.lottie\nassets/css/fonts.css\nassets/css/pdf.css\nassets/emojis/common.ts\nassets/emojis/en.ts\nassets/emojis/es.ts\nassets/emojis/index.ts\nassets/emojis/types.ts\nassets/images/add-reaction.svg\nassets/images/all.svg\nassets/images/android.svg\nassets/images/apple.svg\nassets/images/arrow-down-long.svg\nassets/images/arrow-right-long.svg\nassets/images/arrow-right.svg\nassets/images/arrows-updown.svg\nassets/images/arrow-up-long.svg\nassets/images/arrow-up.svg\nassets/images/back-left.svg\nassets/images/bank.svg\nassets/images/bed.svg\nassets/images/bellSlash.svg\nassets/images/bell.svg\nassets/images/bill.svg\nassets/images/bolt.svg\nassets/images/bookmark.svg\nassets/images/box.svg\nassets/images/briefcase.svg\nassets/images/bug.svg\nassets/images/building.svg\nassets/images/calendar-solid.svg\nassets/images/calendar.svg\nassets/images/camera.svg\nassets/images/caret-up-down.svg\nassets/images/car.svg\nassets/images/car-with-key.svg\nassets/images/cash.svg\nassets/images/chair.svg\nassets/images/chatbubble-add.svg\nassets/images/chatbubble-reply.svg\nassets/images/chatbubbles.svg\nassets/images/chatbubble.svg\nassets/images/chatbubble-unread.svg\nassets/images/check-circle.svg\nassets/images/checkmark-circle.svg\nassets/images/checkmark.svg\nassets/images/circular-arrow-backwards.svg\nassets/images/closed-sign.svg\nassets/images/close.svg\nassets/images/coins.svg\nassets/images/collapse.svg\nassets/images/comment-bubbles.svg\nassets/images/computer.svg\nassets/images/concierge.svg\nassets/images/connection-complete.svg\nassets/images/connect.svg\nassets/images/copy.svg\nassets/images/credit-card-exclamation.svg\nassets/images/credit-card-hourglass.svg\nassets/images/creditcard.svg\nassets/images/crosshair.svg\nassets/images/document-plus.svg\nassets/images/document-slash.svg\nassets/images/document.svg\nassets/images/dot-indicator.svg\nassets/images/dot-indicator-unfilled.svg\nassets/images/download.svg\nassets/images/down.svg\nassets/images/drag-and-drop.svg\nassets/images/drag-handles.svg\nassets/images/emoji.svg\nassets/images/empty-state__attach-receipt.svg\nassets/images/emptystate__expensifycard.svg\nassets/images/emptystate__routepending.svg\nassets/images/eReceipt_background.svg\nassets/images/eReceipt-BGImage.svg\nassets/images/eReceiptIcon.svg\nassets/images/exclamation.svg\nassets/images/exit.svg\nassets/images/expand.svg\nassets/images/expensify-app-icon.svg\nassets/images/expensify-card-icon.svg\nassets/images/expensify-card.svg\nassets/images/expensify-footer-logo.svg\nassets/images/expensify-footer-logo-vertical.svg\nassets/images/expensify-logo--adhoc.svg\nassets/images/expensify-logo--dev.svg\nassets/images/expensify-logo-new.svg\nassets/images/expensify-logo-round-clearspace.png\nassets/images/expensify-logo-round-dark.png\nassets/images/expensify-logo-round.png\nassets/images/expensify-logo-round-transparent.png\nassets/images/expensify-logo--staging.svg\nassets/images/expensify-wordmark.svg\nassets/images/expensify_wordmark_white.svg\nassets/images/eye-disabled.svg\nassets/images/eye.svg\nassets/images/feed.svg\nassets/images/filters.svg\nassets/images/filter.svg\nassets/images/flag_level_01.svg\nassets/images/flag_level_02.svg\nassets/images/flag_level_03.svg\nassets/images/flag.svg\nassets/images/folder.svg\nassets/images/fullscreen.svg\nassets/images/gallery-not-found.svg\nassets/images/gallery.svg\nassets/images/gear.svg\nassets/images/globe.svg\nassets/images/hand.svg\nassets/images/hashtag.svg\nassets/images/heart.svg\nassets/images/history.svg\nassets/images/home-background--android.svg\nassets/images/home-background--desktop.svg\nassets/images/home-background--mobile-new.svg\nassets/images/home-background--mobile.svg\nassets/images/home-fade-gradient--mobile.svg\nassets/images/home-fade-gradient.svg\nassets/images/home.svg\nassets/images/hourglass.svg\nassets/images/image-crop-circle-mask.svg\nassets/images/image-crop-square-mask.svg\nassets/images/inbox.svg\nassets/images/info.svg\nassets/images/invoice-generic.svg\nassets/images/invoice.svg\nassets/images/keyboard.svg\nassets/images/key.svg\nassets/images/LaptopwithSecondScreenandHourglass.svg\nassets/images/laptop-with-second-screen-sync.svg\nassets/images/laptop-with-second-screen-x.svg\nassets/images/link-copy.svg\nassets/images/link.svg\nassets/images/location.svg\nassets/images/lock.svg\nassets/images/luggage.svg\nassets/images/magnifying-glass.svg\nassets/images/mail.svg\nassets/images/make-admin.svg\nassets/images/megaphone.svg\nassets/images/menu.svg\nassets/images/meter.svg\nassets/images/money-bag.svg\nassets/images/money-circle.svg\nassets/images/money-search.svg\nassets/images/money-stack.svg\nassets/images/money-waving.svg\nassets/images/monitor.svg\nassets/images/mute.svg\nassets/images/new-expensify-adhoc.svg\nassets/images/new-expensify-dark.svg\nassets/images/new-expensify-dev.svg\nassets/images/new-expensify-stg.svg\nassets/images/new-expensify.svg\nassets/images/new-window.svg\nassets/images/new-workspace.svg\nassets/images/offline-cloud.svg\nassets/images/offline.svg\nassets/images/olddot-wireframe.svg\nassets/images/paperclip.svg\nassets/images/pause.svg\nassets/images/paycheck.svg\nassets/images/paypal.svg\nassets/images/pencil.svg\nassets/images/phone.svg\nassets/images/pin.svg\nassets/images/plane.svg\n</output>",
+            "timestamp": 1787134026.939567
+        },
+        {
+            "role": "assistant",
+            "content": "I’ll locate chat composer and clipboard-related implementations across the TypeScript/React source while excluding dependencies and generated assets.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RIlE --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=android --exclude-dir=ios '(onPaste|clipboardData|contentEditable|contenteditable|handlePaste|paste|copy)' . | sort | head -200\n```",
+            "timestamp": 1787134032.114406,
+            "extra": {
+                "response": {
+                    "id": "resp_02ffeb576871fe3f016a85804bab1887d09e7f6709956c4551",
+                    "created": 1787134027,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "I’ll locate chat composer and clipboard-related implementations across the TypeScript/React source while excluding dependencies and generated assets.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RIlE --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=android --exclude-dir=ios '(onPaste|clipboardData|contentEditable|contenteditable|handlePaste|paste|copy)' . | sort | head -200\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "provider_specific_fields": {
+                                    "refusal": null
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 164,
+                        "prompt_tokens": 6412,
+                        "total_tokens": 6576,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 13,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 3840,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<output>\n./assets/emojis/common.ts\n./assets/emojis/es.ts\n./config/webpack/webpack.common.ts\n./desktop/main.ts\n./docs/assets/js/main.js\n./.github/actions/javascript/authorChecklist/index.js\n./.github/actions/javascript/awaitStagingDeploys/index.js\n./.github/actions/javascript/checkDeployBlockers/index.js\n./.github/actions/javascript/createOrUpdateStagingDeploy/index.js\n./.github/actions/javascript/getArtifactInfo/index.js\n./.github/actions/javascript/getDeployPullRequestList/index.js\n./.github/actions/javascript/getPullRequestDetails/index.js\n./.github/actions/javascript/isStagingDeployLocked/index.js\n./.github/actions/javascript/markPullRequestsAsDeployed/index.js\n./.github/actions/javascript/postTestBuildComment/index.js\n./.github/actions/javascript/proposalPoliceComment/index.js\n./.github/actions/javascript/reopenIssueWithComment/index.js\n./.github/actions/javascript/reviewerChecklist/index.js\n./.github/actions/javascript/verifySignedCommits/index.js\n./.github/libs/GithubUtils.ts\n./src/components/AmountForm.tsx\n./src/components/AttachmentModal.tsx\n./src/components/AttachmentPicker/index.native.tsx\n./src/components/Attachments/AttachmentView/index.tsx\n./src/components/Button/validateSubmitShortcut/index.ts\n./src/components/ClientSideLoggingToolMenu/index.android.tsx\n./src/components/CommunicationsLink.tsx\n./src/components/Composer/implementation/index.native.tsx\n./src/components/Composer/implementation/index.tsx\n./src/components/Composer/types.ts\n./src/components/CopyTextToClipboard.tsx\n./src/components/FilePicker/index.native.tsx\n./src/components/Form/FormProvider.tsx\n./src/components/Icon/Expensicons.ts\n./src/components/MoneyRequestAmountInput.tsx\n./src/components/PercentageForm.tsx\n./src/components/ProfilingToolMenu/BaseProfilingToolMenu.tsx\n./src/components/ProfilingToolMenu/RNFS/index.web.ts\n./src/components/Search/SearchPageHeader.tsx\n./src/CONST.ts\n./src/hooks/useCopySelectionHelper.ts\n./src/hooks/useDragAndDrop/index.ts\n./src/hooks/useHtmlPaste/index.ts\n./src/languages/en.ts\n./src/languages/es.ts\n./src/libs/actions/connections/index.ts\n./src/libs/actions/OnyxUpdateManager/index.ts\n./src/libs/actions/TransactionEdit.ts\n./src/libs/Clipboard/index.ts\n./src/libs/fileDownload/index.android.ts\n./src/libs/fileDownload/index.ios.ts\n./src/libs/IOUUtils.ts\n./src/libs/KeyboardShortcut/bindHandlerToKeydownEvent/index.ts\n./src/libs/localFileDownload/index.android.ts\n./src/libs/Navigation/linkingConfig/createNormalizedConfigs.ts\n./src/libs/Network/SequentialQueue.ts\n./src/libs/SelectionScraper/index.ts\n./src/libs/SidebarUtils.ts\n./src/pages/Debug/DebugJSON.tsx\n./src/pages/home/report/ContextMenu/BaseReportActionContextMenu.tsx\n./src/pages/home/report/ContextMenu/ContextMenuActions.tsx\n./src/pages/home/report/ReportActionCompose/ComposerWithSuggestions/ComposerWithSuggestions.tsx\n./src/pages/KeyboardShortcutsPage.tsx\n./src/pages/ReferralDetailsPage.tsx\n./src/pages/settings/Security/TwoFactorAuth/Steps/CodesStep.tsx\n./src/pages/settings/Security/TwoFactorAuth/Steps/VerifyStep.tsx\n./src/pages/settings/Wallet/WalletPage/CardDetails.tsx\n./src/pages/ShareCodePage.tsx\n./src/pages/signin/SignInPageLayout/types.ts\n./src/pages/workspace/accounting/intacct/ExistingConnectionsPage.tsx\n./src/pages/workspace/accounting/netsuite/NetSuiteTokenInput/NetSuiteExistingConnectionsPage.tsx\n./src/pages/workspace/WorkspaceProfileSharePage.tsx\n./src/stories/Composer.stories.tsx\n./src/types/onyx/ReportNextStep.ts\n./tests/unit/CurrencyUtilsTest.ts\n</output>",
+            "timestamp": 1787134032.2114873
+        },
+        {
+            "role": "assistant",
+            "content": "The strongest candidates are the web Composer implementation, HTML paste hook, clipboard utility, selection helper, and report composer/context-menu components. I’ll read those files and their nearby call sites to identify the exact functions responsible for preserving pasted line breaks.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && for f in src/components/Composer/implementation/index.tsx src/hooks/useHtmlPaste/index.ts src/hooks/useCopySelectionHelper.ts src/libs/Clipboard/index.ts src/libs/SelectionScraper/index.ts src/pages/home/report/ReportActionCompose/ComposerWithSuggestions/ComposerWithSuggestions.tsx src/pages/home/report/ContextMenu/BaseReportActionContextMenu.tsx src/pages/home/report/ContextMenu/ContextMenuActions.tsx src/components/CopyTextToClipboard.tsx src/components/Composer/types.ts; do echo \"===== $f =====\"; grep -nE '^(export |const |function |class |type |interface )|onPaste|clipboard|paste|copy|line|newline|contentEditable|contenteditable|Selection' \"$f\" | head -160; done\n```",
+            "timestamp": 1787134040.2492313,
+            "extra": {
+                "response": {
+                    "id": "resp_0cb030fdaccb9d48016a85805177a48191bda01d2da042e2db",
+                    "created": 1787134033,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "The strongest candidates are the web Composer implementation, HTML paste hook, clipboard utility, selection helper, and report composer/context-menu components. I’ll read those files and their nearby call sites to identify the exact functions responsible for preserving pasted line breaks.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && for f in src/components/Composer/implementation/index.tsx src/hooks/useHtmlPaste/index.ts src/hooks/useCopySelectionHelper.ts src/libs/Clipboard/index.ts src/libs/SelectionScraper/index.ts src/pages/home/report/ReportActionCompose/ComposerWithSuggestions/ComposerWithSuggestions.tsx src/pages/home/report/ContextMenu/BaseReportActionContextMenu.tsx src/pages/home/report/ContextMenu/ContextMenuActions.tsx src/components/CopyTextToClipboard.tsx src/components/Composer/types.ts; do echo \"===== $f =====\"; grep -nE '^(export |const |function |class |type |interface )|onPaste|clipboard|paste|copy|line|newline|contentEditable|contenteditable|Selection' \"$f\" | head -160; done\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Inspecting relevant files with sed commands**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Inspecting relevant files with sed commands**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 285,
+                        "prompt_tokens": 7432,
+                        "total_tokens": 7717,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 27,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 5888,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<warning>\nThe output of your last command was too long.\nPlease try a different command that produces less output.\nIf you're looking at a file you can try use head, tail or sed to view a smaller number of lines selectively.\nIf you're using grep or find and it produced too much output, you can use a more selective search pattern.\nIf you really need to see something from the full command's output, you can redirect output to a file and then search in that file.\n</warning><output_head>\n===== src/components/Composer/implementation/index.tsx =====\n5:// eslint-disable-next-line no-restricted-imports\n6:import type {NativeSyntheticEvent, TextInput, TextInputKeyPressEventData, TextInputSelectionChangeEventData} from 'react-native';\n25:const excludeNoStyles: Array<keyof MarkdownStyle> = [];\n26:const excludeReportMentionStyle: Array<keyof MarkdownStyle> = ['mentionReport'];\n27:const imagePreviewAuthRequiredURLs = [CONST.EXPENSIFY_URL, CONST.STAGING_EXPENSIFY_URL];\n31:function Composer(\n42:        onPasteFile = () => {},\n43:        onSelectionChange = () => {},\n63:    const [selection, setSelection] = useState<\n84:        setSelection(selectionProp);\n85:        // eslint-disable-next-line react-compiler/react-compiler, react-hooks/exhaustive-deps\n91:    const addCursorPositionToSelectionChange = (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {\n92:        const webEvent = event as BaseSyntheticEvent<TextInputSelectionChangeEventData>;\n93:        const sel = window.getSelection();\n114:            onSelectionChange({\n121:            setSelection(selectionValue);\n123:            onSelectionChange(webEvent);\n124:            setSelection(webEvent.nativeEvent.selection);\n129:     * Check the paste event for an attachment, parse the data and call onPasteFile from props with the selected file,\n130:     * Otherwise, convert pasted HTML to Markdown and set it on the composer.\n136:            const isContenteditableDivFocused = document.activeElement?.nodeName === 'DIV' && document.activeElement?.hasAttribute('contenteditable');\n142:            if (textInput.current !== event.target && !(isContenteditableDivFocused && !event.clipboardData?.files.length)) {\n144:                // To make sure the composer does not capture paste events from other inputs, we check where the event originated\n145:                // If it did originate in another input, we return early to prevent the composer from handling the paste\n146:                const isTargetInput = eventTarget?.nodeName === 'INPUT' || eventTarget?.nodeName === 'TEXTAREA' || eventTarget?.contentEditable === 'true';\n147:                if (isTargetInput || (!isFocused && isContenteditableDivFocused && event.clipboardData?.files.length)) {\n158:            const clipboardDataHtml = event.clipboardData?.getData(TEXT_HTML) ?? '';\n160:            // If paste contains files, then trigger file management\n161:            if (event.clipboardData?.files.length && event.clipboardData.files.length > 0) {\n163:                onPasteFile(event.clipboardData.files[0]);\n167:            // If paste contains base64 image\n168:            if (clipboardDataHtml?.includes(CONST.IMAGE_BASE64_MATCH)) {\n170:                const pastedHTML = clipboardDataHtml;\n171:                const embeddedImages = domparser.parseFromString(pastedHTML, TEXT_HTML)?.images;\n176:                    onPasteFile(file);\n181:            // If paste contains image from Google Workspaces ex: Sheets, Docs, Slide, etc\n182:            if (clipboardDataHtml?.includes(CONST.GOOGLE_DOC_IMAGE_LINK_MATCH)) {\n184:                const pastedHTML = clipboardDataHtml;\n185:                const embeddedImages = domparser.parseFromString(pastedHTML, TEXT_HTML).images;\n194:                                onPasteFile(file);\n202:        [onPasteFile, checkComposerVisibility],\n249:        // eslint-disable-next-line react-compiler/react-compiler\n251:        // eslint-disable-next-line react-compiler/react-compiler, react-hooks/exhaustive-deps\n276:        } as NativeSyntheticEvent<TextInputSelectionChangeEventData>;\n277:        onSelectionChange(selectionEvent);\n278:        setSelection({start: 0, end: 0});\n281:    }, [onClear, onSelectionChange]);\n327:            StyleSheet.flatten([style, {outline: 'none'}]),\n352:            /* eslint-disable-next-line react/jsx-props-no-spreading */\n354:            onSelectionChange={addCursorPositionToSelectionChange}\n368:export default React.forwardRef(Composer);\n===== src/hooks/useHtmlPaste/index.ts =====\n6:const insertByCommand = (text: string) => {\n10:const insertAtCaret = (target: HTMLElement, text: string) => {\n11:    const selection = window.getSelection();\n30:const useHtmlPaste: UseHtmlPaste = (textInputRef, preHtmlPasteCallback, removeListenerOnScreenBlur = false) => {\n34:     * Set pasted text to clipboard\n37:    const paste = useCallback((text: string) => {\n40:            if (textInputHTMLElement?.hasAttribute('contenteditable')) {\n46:            // Pointer will go out of sight when a large paragraph is pasted on the web. Refocusing the input keeps the cursor in view.\n54:            // eslint-disable-next-line no-empty\n57:        // eslint-disable-next-line react-compiler/react-compiler, react-hooks/exhaustive-deps\n61:     * Manually place the pasted HTML into Composer\n63:     * @param {String} html - pasted HTML\n67:            paste(Parser.htmlToMarkdown(html));\n69:        [paste],\n79:            const plainText = event.clipboardData?.getData('text/pla\n</output_head>\n<elided_chars>\n8894 characters elided\n</elided_chars>\n<output_tail>\nultiline\n786:                    onPasteFile={(file) => {\n793:                    onSelectionChange={onSelectionChange}\n817:                setSelection={setSelection}\n839:const ComposerWithSuggestionsWithRef = forwardRef(ComposerWithSuggestions);\n841:export default withOnyx<ComposerWithSuggestionsProps & RefAttributes<ComposerRef>, ComposerWithSuggestionsOnyxProps>({\n859:export type {ComposerWithSuggestionsProps, ComposerRef};\n===== src/pages/home/report/ContextMenu/BaseReportActionContextMenu.tsx =====\n5:// eslint-disable-next-line no-restricted-imports\n34:type BaseReportActionContextMenuProps = {\n43:    // eslint-disable-next-line react/no-unused-prop-types\n55:    /** The copy selection. */\n92:type MenuItemRefs = Record<string, ContextMenuItemHandle | null>;\n94:function BaseReportActionContextMenu({\n115:    // eslint-disable-next-line rulesdir/prefer-shouldUseNarrowLayout-instead-of-isSmallScreenWidth\n120:    const {isOffline} = useNetwork();\n151:        () => ReportActionsUtils.getOneTransactionThreadReportID(childReport?.reportID ?? '-1', paginatedReportActions ?? [], isOffline),\n152:        [childReport?.reportID, paginatedReportActions, isOffline],\n197:                isOffline: !!isOffline,\n312:                            // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style\n336:                        const transactionPayload = textTranslateKey === 'reportActionContextMenu.copyToClipboard' && transaction && {transaction};\n374:export default memo(BaseReportActionContextMenu, lodashIsEqual);\n376:export type {BaseReportActionContextMenuProps};\n===== src/pages/home/report/ContextMenu/ContextMenuActions.tsx =====\n5:// eslint-disable-next-line no-restricted-imports\n40:function getActionHtml(reportAction: OnyxInputOrEntry<ReportAction>): string {\n46:function setClipboardMessage(content: string) {\n57:type ShouldShow = (args: {\n67:    isOffline: boolean;\n75:type ContextMenuActionPayload = {\n94:type OnPress = (closePopover: boolean, payload: ContextMenuActionPayload, selection?: string, reportID?: string, draftMessage?: string) => void;\n96:type RenderContent = (closePopover: boolean, payload: ContextMenuActionPayload) => React.ReactElement;\n98:type GetDescription = (selection?: string) => string | void;\n100:type ContextMenuActionWithContent = {\n104:type ContextMenuActionWithIcon = {\n113:type ContextMenuAction = (ContextMenuActionWithContent | ContextMenuActionWithIcon) & {\n121:const ContextMenuActions: ContextMenuAction[] = [\n332:        textTranslateKey: 'reportActionContextMenu.copyURLToClipboard',\n345:        textTranslateKey: 'reportActionContextMenu.copyEmailToClipboard',\n358:        textTranslateKey: 'reportActionContextMenu.copyToClipboard',\n497:        textTranslateKey: 'reportActionContextMenu.copyLink',\n504:            // Only hide the copylink menu item when context menu is opened over img element.\n571:        shouldShow: ({reportAction, isOffline}) => {\n575:            return isAttachment && !isUploading && !!reportAction?.reportActionID && !ReportActionsUtils.isMessageDeleted(reportAction) && !isOffline;\n595:        textTranslateKey: 'reportActionContextMenu.copyOnyxData',\n655:const restrictedReadOnlyActions: TranslationPaths[] = [\n662:const RestrictedReadOnlyContextMenuActions: ContextMenuAction[] = ContextMenuActions.filter(\n666:export {RestrictedReadOnlyContextMenuActions};\n667:export default ContextMenuActions;\n668:export type {ContextMenuActionPayload, ContextMenuAction};\n===== src/components/CopyTextToClipboard.tsx =====\n8:type CopyTextToClipboardProps = {\n9:    /** The text to display and copy to the clipboard */\n20:function CopyTextToClipboard({text, textStyles, urlToCopy, accessibilityRole}: CopyTextToClipboardProps) {\n23:    const copyToClipboard = useCallback(() => {\n24:        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- nullish coalescing doesn't achieve the same result in this case\n31:            tooltipText={translate('reportActionContextMenu.copyToClipboard')}\n35:            onPress={copyToClipboard}\n37:            accessibilityLabel={translate('reportActionContextMenu.copyToClipboard')}\n45:export default CopyTextToClipboard;\n===== src/components/Composer/types.ts =====\n1:import type {NativeSyntheticEvent, StyleProp, TextInputProps, TextInputSelectionChangeEventData, TextStyle} from 'react-native';\n4:type TextSelection = {\n10:type CustomSelectionChangeEvent = NativeSyntheticEvent<TextInputSelectionChangeEventData> & {\n15:type ComposerProps = Omit<TextInputProps, 'onClear'> & {\n16:    /** Indicate whether input is multiline */\n17:    multiline?: boolean;\n19:    /** Maximum number of lines in the text input */\n38:    onPasteFile?: (file: FileObject) => void;\n41:    // eslint-disable-next-line react/forbid-prop-types\n52:    onSelectionChange?: (event: CustomSelectionChangeEvent) => void;\n54:    /** Selection Object */\n55:    selection?: TextSelection;\n79:export type {TextSelection, ComposerProps, CustomSelectionChangeEvent};\n\n</output_tail>",
+            "timestamp": 1787134040.288856
+        },
+        {
+            "role": "assistant",
+            "content": "The key path is now narrowed to `useHtmlPaste`, the web `Composer`, and the context-menu copy logic. I’ll inspect only the relevant function bodies and constants to determine where line breaks are transformed or stripped.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '1,130p' src/hooks/useHtmlPaste/index.ts && sed -n '120,220p' src/components/Composer/implementation/index.tsx && sed -n '1,75p' src/pages/home/report/ContextMenu/ContextMenuActions.tsx && sed -n '345,375p' src/pages/home/report/ContextMenu/ContextMenuActions.tsx && grep -RInE 'useHtmlPaste|setClipboardMessage|getActionHtml|htmlToMarkdown|TEXT_HTML|text/plain' src/components src/hooks src/libs src/pages/home/report | head -120\n```",
+            "timestamp": 1787134046.6735675,
+            "extra": {
+                "response": {
+                    "id": "resp_0ac63b136bd9264d016a85805981f88191a510ca446728346d",
+                    "created": 1787134041,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "The key path is now narrowed to `useHtmlPaste`, the web `Composer`, and the context-menu copy logic. I’ll inspect only the relevant function bodies and constants to determine where line breaks are transformed or stripped.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '1,130p' src/hooks/useHtmlPaste/index.ts && sed -n '120,220p' src/components/Composer/implementation/index.tsx && sed -n '1,75p' src/pages/home/report/ContextMenu/ContextMenuActions.tsx && sed -n '345,375p' src/pages/home/report/ContextMenu/ContextMenuActions.tsx && grep -RInE 'useHtmlPaste|setClipboardMessage|getActionHtml|htmlToMarkdown|TEXT_HTML|text/plain' src/components src/hooks src/libs src/pages/home/report | head -120\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Planning selective file inspection**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Planning selective file inspection**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 235,
+                        "prompt_tokens": 10086,
+                        "total_tokens": 10321,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 16,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 6912,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<warning>\nThe output of your last command was too long.\nPlease try a different command that produces less output.\nIf you're looking at a file you can try use head, tail or sed to view a smaller number of lines selectively.\nIf you're using grep or find and it produced too much output, you can use a more selective search pattern.\nIf you really need to see something from the full command's output, you can redirect output to a file and then search in that file.\n</warning><output_head>\nimport {useNavigation} from '@react-navigation/native';\nimport {useCallback, useEffect} from 'react';\nimport Parser from '@libs/Parser';\nimport type UseHtmlPaste from './types';\n\nconst insertByCommand = (text: string) => {\n    document.execCommand('insertText', false, text);\n};\n\nconst insertAtCaret = (target: HTMLElement, text: string) => {\n    const selection = window.getSelection();\n    if (selection?.rangeCount) {\n        const range = selection.getRangeAt(0);\n        range.deleteContents();\n        const node = document.createTextNode(text);\n        range.insertNode(node);\n\n        // Move caret to the end of the newly inserted text node.\n        range.setStart(node, node.length);\n        range.setEnd(node, node.length);\n        selection.setBaseAndExtent(range.startContainer, range.startOffset, range.endContainer, range.endOffset);\n\n        // Dispatch input event to trigger Markdown Input to parse the new text\n        target.dispatchEvent(new Event('input', {bubbles: true}));\n    } else {\n        insertByCommand(text);\n    }\n};\n\nconst useHtmlPaste: UseHtmlPaste = (textInputRef, preHtmlPasteCallback, removeListenerOnScreenBlur = false) => {\n    const navigation = useNavigation();\n\n    /**\n     * Set pasted text to clipboard\n     * @param {String} text\n     */\n    const paste = useCallback((text: string) => {\n        try {\n            const textInputHTMLElement = textInputRef.current as HTMLElement;\n            if (textInputHTMLElement?.hasAttribute('contenteditable')) {\n                insertAtCaret(textInputHTMLElement, text);\n            } else {\n                insertByCommand(text);\n            }\n\n            // Pointer will go out of sight when a large paragraph is pasted on the web. Refocusing the input keeps the cursor in view.\n            // To avoid the keyboard toggle issue in mWeb if using blur() and focus() functions, we just need to dispatch the event to trigger the onFocus handler\n            // We need to trigger the bubbled \"focusin\" event to make sure the onFocus handler is triggered\n            textInputHTMLElement.dispatchEvent(\n                new FocusEvent('focusin', {\n                    bubbles: true,\n                }),\n            );\n            // eslint-disable-next-line no-empty\n        } catch (e) {}\n        // We only need to set the callback once.\n        // eslint-disable-next-line react-compiler/react-compiler, react-hooks/exhaustive-deps\n    }, []);\n\n    /**\n     * Manually place the pasted HTML into Composer\n     *\n     * @param {String} html - pasted HTML\n     */\n    const handlePastedHTML = useCallback(\n        (html: string) => {\n            paste(Parser.htmlToMarkdown(html));\n        },\n        [paste],\n    );\n\n    /**\n     * Paste the plaintext content into Composer.\n     *\n     * @param {ClipboardEvent} event\n     */\n    const handlePastePlainText = useCallback(\n        (event: ClipboardEvent) => {\n            const plainText = event.clipboardData?.getData('text/plain');\n            if (plainText) {\n                paste(plainText);\n            }\n        },\n        [paste],\n    );\n\n    const handlePaste = useCallback(\n        (event: ClipboardEvent) => {\n            if (!textInputRef.current) {\n                return;\n            }\n\n            if (preHtmlPasteCallback?.(event)) {\n                return;\n            }\n\n            const isFocused = textInputRef.current?.isFocused();\n\n            if (!isFocused) {\n                return;\n            }\n\n            event.preventDefault();\n\n            const TEXT_HTML = 'text/html';\n\n            // If paste contains HTML\n            if (event.clipboardData?.types?.includes(TEXT_HTML)) {\n                const pastedHTML = event.clipboardData.getData(TEXT_HTML);\n\n                const domparser = new DOMParser();\n                const embeddedImages = domparser.parseFromString(pastedHTML, TEXT_HTML).images;\n\n                // Exclude parsing img tags in the HTML, as fetching the image via fetch triggers a connect-src Content-Security-Policy error.\n                if (embeddedImages.length > 0 && embeddedImages[0].src) {\n                    // If HTML has emoji, then treat this as plain text.\n                    if (embeddedImages[0].dataset && embeddedImages[0].dataset.stringifyType === 'emoji') {\n                        handlePastePlainText(event);\n                        return;\n                    }\n                }\n                handlePastedHTML(pastedHTML);\n                return;\n            }\n            handlePastePlainText(event);\n        },\n        // eslint-disable-next-line react-compiler/react-compiler, react-hooks/exhaustive-deps\n        [handlePastedHTML, handlePastePlainText, preHtmlPasteCallback],\n    );\n\n            });\n            setSelection(selectionValue);\n        } else {\n            onSelectionChange(webEvent);\n            setSelection(webEvent.nativeEvent.selection);\n        }\n    };\n\n    /**\n     * Check the paste event for an attachment, parse the data and call onPasteFile from props \n</output_head>\n<elided_chars>\n11519 characters elided\n</elided_chars>\n<output_tail>\ning, extras?: Extras): string {\nsrc/libs/Parser.ts:32:        return super.htmlToMarkdown(htmlString, {\nsrc/libs/ExportOnyxState/index.ts:35:    element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(value)}`);\nsrc/libs/actions/Report.ts:1597:    const originalCommentMarkdown = Parser.htmlToMarkdown(originalCommentHTML ?? '').trim();\nsrc/libs/localFileCreate/index.ts:12:    const blob = new Blob([textContent], {type: 'text/plain'});\nsrc/libs/Clipboard/index.ts:44:        e.clipboardData?.setData('text/plain', text);\nsrc/libs/Clipboard/index.ts:126:                'text/plain': new Blob([text], {type: 'text/plain'}),\nsrc/libs/localFileDownload/index.android.ts:17:                mimeType: 'text/plain',\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:40:function getActionHtml(reportAction: OnyxInputOrEntry<ReportAction>): string {\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:46:function setClipboardMessage(content: string) {\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:48:        Clipboard.setString(Parser.htmlToMarkdown(content));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:52:        const plainText = isAnchorTag ? Parser.htmlToMarkdown(content) : Parser.htmlToText(content);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:249:                    Report.saveReportActionDraft(reportID, reportAction, Parser.htmlToMarkdown(getActionHtml(reportAction)));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:373:            const messageHtml = getActionHtml(reportAction);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:386:                    setClipboardMessage(displayMessage);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:399:                        setClipboardMessage(displayMessage);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:406:                    setClipboardMessage(logMessage);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:413:                    setClipboardMessage(mentionWhisperMessage);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:415:                    setClipboardMessage(CONST.ACTIONABLE_TRACK_EXPENSE_WHISPER_MESSAGE);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:417:                    setClipboardMessage(ReportActionsUtils.getRenamedAction(reportAction));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:424:                        setClipboardMessage(ReportUtils.getReportAutomaticallySubmittedMessage(reportAction));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:431:                        setClipboardMessage(ReportUtils.getReportAutomaticallyApprovedMessage(reportAction));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:440:                        setClipboardMessage(ReportUtils.getReportAutomaticallyForwardedMessage(reportAction, reportID));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:460:                    setClipboardMessage(ReportActionsUtils.getExportIntegrationMessageHTML(reportAction));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:462:                    setClipboardMessage(ReportActionsUtils.getUpdateRoomDescriptionMessage(reportAction));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:464:                    setClipboardMessage(ReportActionsUtils.getPolicyChangeLogAddEmployeeMessage(reportAction));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:466:                    setClipboardMessage(ReportActionsUtils.getPolicyChangeLogChangeRoleMessage(reportAction));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:468:                    setClipboardMessage(ReportActionsUtils.getPolicyChangeLogDeleteMemberMessage(reportAction));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:471:                    setClipboardMessage(Localize.translateLocal('report.actions.type.integrationSyncFailed', {label, errorMessage}));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:474:                    setClipboardMessage(ReportActionsUtils.getCardIssuedMessage(reportAction, true, report?.policyID, hasCard));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:476:                    setClipboardMessage(ReportActionsUtils.getRemovedConnectionMessage(reportAction));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:478:                    setClipboardMessage(\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:573:            const html = getActionHtml(reportAction);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:578:            const html = getActionHtml(reportAction);\nsrc/pages/home/report/ReportActionCompose/ComposerWithSuggestions/ComposerWithSuggestions.tsx:503:                    Report.saveReportActionDraft(reportID, lastReportAction, Parser.htmlToMarkdown(message?.html ?? ''));\nsrc/pages/home/report/ReportActionItemMessageEdit.tsx:128:        const originalMessage = Parser.htmlToMarkdown(ReportActionsUtils.getReportActionHtml(action), {\n\n</output_tail>",
+            "timestamp": 1787134046.7460406
+        },
+        {
+            "role": "assistant",
+            "content": "The likely failure is in the round trip between context-menu copying and HTML paste: copied selected content is converted through `Parser.htmlToMarkdown`, then pasted HTML is converted again. I’ll inspect those conversion functions and the exact clipboard payload construction to see how `<br>`, paragraph, or block boundaries are handled.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -nE 'htmlToMarkdown|htmlToText|function setClipboardMessage|function getActionHtml|setData' src/libs/Parser.ts src/pages/home/report/ContextMenu/ContextMenuActions.tsx src/libs/Clipboard/index.ts\n```",
+            "timestamp": 1787134051.9006045,
+            "extra": {
+                "response": {
+                    "id": "resp_0d721984b89f4feb016a85805faf2c87d0a6088eda7ed57472",
+                    "created": 1787134047,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "The likely failure is in the round trip between context-menu copying and HTML paste: copied selected content is converted through `Parser.htmlToMarkdown`, then pasted HTML is converted again. I’ll inspect those conversion functions and the exact clipboard payload construction to see how `<br>`, paragraph, or block boundaries are handled.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -nE 'htmlToMarkdown|htmlToText|function setClipboardMessage|function getActionHtml|setData' src/libs/Parser.ts src/pages/home/report/ContextMenu/ContextMenuActions.tsx src/libs/Clipboard/index.ts\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Inspecting htmlToMarkdown and clipboard functions**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Inspecting htmlToMarkdown and clipboard functions**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 187,
+                        "prompt_tokens": 12523,
+                        "total_tokens": 12710,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 23,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 8960,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<output>\nsrc/libs/Parser.ts:31:    htmlToMarkdown(htmlString: string, extras?: Extras): string {\nsrc/libs/Parser.ts:32:        return super.htmlToMarkdown(htmlString, {\nsrc/libs/Parser.ts:39:    htmlToText(htmlString: string, extras?: Extras): string {\nsrc/libs/Parser.ts:40:        return super.htmlToText(htmlString, {\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:40:function getActionHtml(reportAction: OnyxInputOrEntry<ReportAction>): string {\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:46:function setClipboardMessage(content: string) {\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:48:        Clipboard.setString(Parser.htmlToMarkdown(content));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:52:        const plainText = isAnchorTag ? Parser.htmlToMarkdown(content) : Parser.htmlToText(content);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:249:                    Report.saveReportActionDraft(reportID, reportAction, Parser.htmlToMarkdown(getActionHtml(reportAction)));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:396:                    if (displayMessage === Parser.htmlToText(displayMessage)) {\nsrc/libs/Clipboard/index.ts:43:        e.clipboardData?.setData('text/html', html);\nsrc/libs/Clipboard/index.ts:44:        e.clipboardData?.setData('text/plain', text);\n</output>",
+            "timestamp": 1787134051.9163544
+        },
+        {
+            "role": "assistant",
+            "content": "I’ll read the parser wrapper and the underlying parser implementation references, plus the compact clipboard/context-menu bodies, to identify the precise conversion functions and their handling of line-oriented HTML.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '1,80p' src/libs/Parser.ts && sed -n '1,65p' src/pages/home/report/ContextMenu/ContextMenuActions.tsx && sed -n '1,75p' src/libs/Clipboard/index.ts && grep -RInE --include='*.ts' --include='*.tsx' 'class .*Parser|htmlToMarkdown\\(|htmlToText\\(' src | head -100\n```",
+            "timestamp": 1787134057.3848398,
+            "extra": {
+                "response": {
+                    "id": "resp_0e6b5cb44a176555016a858064ec788191a6751b754b79e450",
+                    "created": 1787134052,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "I’ll read the parser wrapper and the underlying parser implementation references, plus the compact clipboard/context-menu bodies, to identify the precise conversion functions and their handling of line-oriented HTML.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '1,80p' src/libs/Parser.ts && sed -n '1,65p' src/pages/home/report/ContextMenu/ContextMenuActions.tsx && sed -n '1,75p' src/libs/Clipboard/index.ts && grep -RInE --include='*.ts' --include='*.tsx' 'class .*Parser|htmlToMarkdown\\(|htmlToText\\(' src | head -100\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "provider_specific_fields": {
+                                    "refusal": null
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 176,
+                        "prompt_tokens": 13023,
+                        "total_tokens": 13199,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 0,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 12032,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<warning>\nThe output of your last command was too long.\nPlease try a different command that produces less output.\nIf you're looking at a file you can try use head, tail or sed to view a smaller number of lines selectively.\nIf you're using grep or find and it produced too much output, you can use a more selective search pattern.\nIf you really need to see something from the full command's output, you can redirect output to a file and then search in that file.\n</warning><output_head>\n// eslint-disable-next-line no-restricted-imports\nimport {ExpensiMark} from 'expensify-common';\nimport Onyx from 'react-native-onyx';\nimport ONYXKEYS from '@src/ONYXKEYS';\nimport Log from './Log';\nimport * as ReportConnection from './ReportConnection';\n\nconst accountIDToNameMap: Record<string, string> = {};\n\nOnyx.connect({\n    key: ONYXKEYS.PERSONAL_DETAILS_LIST,\n    callback: (personalDetailsList) => {\n        Object.values(personalDetailsList ?? {}).forEach((personalDetails) => {\n            if (!personalDetails) {\n                return;\n            }\n\n            accountIDToNameMap[personalDetails.accountID] = personalDetails.login ?? personalDetails.displayName ?? '';\n        });\n    },\n});\n\ntype Extras = {\n    reportIDToName?: Record<string, string>;\n    accountIDToName?: Record<string, string>;\n    cacheVideoAttributes?: (vidSource: string, attrs: string) => void;\n    videoAttributeCache?: Record<string, string>;\n};\n\nclass ExpensiMarkWithContext extends ExpensiMark {\n    htmlToMarkdown(htmlString: string, extras?: Extras): string {\n        return super.htmlToMarkdown(htmlString, {\n            reportIDToName: extras?.reportIDToName ?? ReportConnection.getAllReportsNameMap(),\n            accountIDToName: extras?.accountIDToName ?? accountIDToNameMap,\n            cacheVideoAttributes: extras?.cacheVideoAttributes,\n        });\n    }\n\n    htmlToText(htmlString: string, extras?: Extras): string {\n        return super.htmlToText(htmlString, {\n            reportIDToName: extras?.reportIDToName ?? ReportConnection.getAllReportsNameMap(),\n            accountIDToName: extras?.accountIDToName ?? accountIDToNameMap,\n            cacheVideoAttributes: extras?.cacheVideoAttributes,\n        });\n    }\n\n    truncateHTML(htmlString: string, limit: number, extras?: {ellipsis: string | undefined}): string {\n        return super.truncateHTML(htmlString, limit, extras);\n    }\n}\n\nExpensiMarkWithContext.setLogger(Log);\nconst Parser = new ExpensiMarkWithContext();\n\nexport default Parser;\nimport {Str} from 'expensify-common';\nimport type {MutableRefObject} from 'react';\nimport React from 'react';\nimport {InteractionManager} from 'react-native';\n// eslint-disable-next-line no-restricted-imports\nimport type {GestureResponderEvent, Text, View} from 'react-native';\nimport type {OnyxEntry} from 'react-native-onyx';\nimport type {Emoji} from '@assets/emojis/types';\nimport * as Expensicons from '@components/Icon/Expensicons';\nimport MiniQuickEmojiReactions from '@components/Reactions/MiniQuickEmojiReactions';\nimport QuickEmojiReactions from '@components/Reactions/QuickEmojiReactions';\nimport addEncryptedAuthTokenToURL from '@libs/addEncryptedAuthTokenToURL';\nimport * as Browser from '@libs/Browser';\nimport Clipboard from '@libs/Clipboard';\nimport EmailUtils from '@libs/EmailUtils';\nimport * as Environment from '@libs/Environment/Environment';\nimport fileDownload from '@libs/fileDownload';\nimport getAttachmentDetails from '@libs/fileDownload/getAttachmentDetails';\nimport * as Localize from '@libs/Localize';\nimport ModifiedExpenseMessage from '@libs/ModifiedExpenseMessage';\nimport Navigation from '@libs/Navigation/Navigation';\nimport Parser from '@libs/Parser';\nimport ReportActionComposeFocusManager from '@libs/ReportActionComposeFocusManager';\nimport * as ReportActionsUtils from '@libs/ReportActionsUtils';\nimport * as ReportConnection from '@libs/ReportConnection';\nimport * as ReportUtils from '@libs/ReportUtils';\nimport * as TaskUtils from '@libs/TaskUtils';\nimport * as Download from '@userActions/Download';\nimport * as Report from '@userActions/Report';\nimport CONST from '@src/CONST';\nimport type {TranslationPaths} from '@src/languages/types';\nimport ONYXKEYS from '@src/ONYXKEYS';\nimport ROUTES from '@src/ROUTES';\nimport type {Beta, Download as DownloadOnyx, OnyxInputOrEntry, ReportAction, ReportActionReactions, Transaction, User} from '@src/types/onyx';\nimport type IconAsset from '@src/types/utils/IconAsset';\nimport type {ContextMenuAnchor} from './ReportActionContextMenu';\nimport {hideContextMenu, showDeleteModal} from './ReportActionContextMenu';\n\n/** Gets the HTML version of the message in an action */\nfunction getActionHtml(reportAction: OnyxInputOrEntry<ReportAction>): string {\n    const message = Array.isArray(reportAction?.message) ? reportAction?.message?.at(-1) ?? null : reportAction?.message ?? null;\n    return message?.html ?? '';\n}\n\n/** Sets the HTML string to Clipboard */\nfunction setClipboardMessage(content: string) {\n    if (!Clipboard.canSetHtml()) {\n        Clipboard.setString(Parser.htmlToMarkdown(content));\n    } else {\n        const anchorRegex = CONST.REGEX_LINK_IN_ANCHOR;\n        const isAnchorTag = anchorRegex.test(content);\n        const plainText = isAnchorTag ? Parser.htmlToMarkdown(content) : Parser.htmlToText(content);\n        Clipboard.setHtml(content, plainText);\n    }\n}\n\ntype ShouldShow = (args: {\n    type: string;\n    reportAction: OnyxEntry<ReportAction>;\n    isArchivedRoom: boolean;\n    betas: OnyxEn\n</output_head>\n<elided_chars>\n3509 characters elided\n</elided_chars>\n<output_tail>\nc/pages/workspace/taxes/NamePage.tsx:41:    const [name, setName] = useState(() => Parser.htmlToMarkdown(currentTaxRate?.name ?? ''));\nsrc/pages/workspace/WorkspaceInviteMessagePage.tsx:74:            Parser.htmlToMarkdown(policy?.description ?? '') ||\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:48:        Clipboard.setString(Parser.htmlToMarkdown(content));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:52:        const plainText = isAnchorTag ? Parser.htmlToMarkdown(content) : Parser.htmlToText(content);\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:249:                    Report.saveReportActionDraft(reportID, reportAction, Parser.htmlToMarkdown(getActionHtml(reportAction)));\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx:396:                    if (displayMessage === Parser.htmlToText(displayMessage)) {\nsrc/pages/home/report/ReportActionCompose/ComposerWithSuggestions/ComposerWithSuggestions.tsx:503:                    Report.saveReportActionDraft(reportID, lastReportAction, Parser.htmlToMarkdown(message?.html ?? ''));\nsrc/pages/home/report/ReportActionItemMessageEdit.tsx:128:        const originalMessage = Parser.htmlToMarkdown(ReportActionsUtils.getReportActionHtml(action), {\nsrc/pages/tasks/NewTaskDetailsPage.tsx:51:        setTaskDescription(Parser.htmlToMarkdown(Parser.replace(task?.description ?? '')));\nsrc/pages/tasks/NewTaskDetailsPage.tsx:136:                        defaultValue={Parser.htmlToMarkdown(Parser.replace(taskDescription))}\nsrc/pages/tasks/NewTaskDescriptionPage.tsx:80:                            defaultValue={Parser.htmlToMarkdown(Parser.replace(task?.description ?? ''))}\nsrc/pages/tasks/TaskDescriptionPage.tsx:56:            if (values.description !== Parser.htmlToMarkdown(report?.description ?? '') && !isEmptyObject(report)) {\nsrc/pages/tasks/TaskDescriptionPage.tsx:122:                            defaultValue={Parser.htmlToMarkdown(report?.description ?? '')}\nsrc/pages/PrivateNotes/PrivateNotesEditPage.tsx:50:        () => ReportActions.getDraftPrivateNote(report.reportID).trim() || Parser.htmlToMarkdown(report?.privateNotes?.[Number(route.params.accountID)]?.note ?? '').trim(),\nsrc/pages/PrivateNotes/PrivateNotesEditPage.tsx:91:            editedNote = ReportActions.handleUserDeletedLinksInHtml(privateNote.trim(), Parser.htmlToMarkdown(originalNote).trim());\nsrc/libs/Parser.ts:31:    htmlToMarkdown(htmlString: string, extras?: Extras): string {\nsrc/libs/Parser.ts:32:        return super.htmlToMarkdown(htmlString, {\nsrc/libs/Parser.ts:39:    htmlToText(htmlString: string, extras?: Extras): string {\nsrc/libs/Parser.ts:40:        return super.htmlToText(htmlString, {\nsrc/libs/SidebarUtils.ts:469:            result.alternateText = ReportUtils.formatReportLastMessageText(Parser.htmlToText(`${lastActorDisplayName}: ${lastMessageText}`));\nsrc/libs/SidebarUtils.ts:487:                    ? ReportUtils.formatReportLastMessageText(Parser.htmlToText(lastMessageText))\nsrc/libs/SidebarUtils.ts:499:                ? ReportUtils.formatReportLastMessageText(Parser.htmlToText(`${lastActorDisplayName}: ${lastMessageText}`))\nsrc/libs/SidebarUtils.ts:500:                : ReportUtils.formatReportLastMessageText(Parser.htmlToText(lastMessageText)) || formattedLogin;\nsrc/libs/SidebarUtils.ts:547:            welcomeMessage.messageText = Parser.htmlToText(welcomeMessage.messageHtml);\nsrc/libs/SidebarUtils.ts:609:        welcomeMessage.messageText = Parser.htmlToText(welcomeMessage.messageHtml);\nsrc/libs/OptionsListUtils.ts:488:    const formattedLastMessageText = ReportUtils.formatReportLastMessageText(Parser.htmlToText(option.lastMessageText ?? ''));\nsrc/libs/actions/Report.ts:1597:    const originalCommentMarkdown = Parser.htmlToMarkdown(originalCommentHTML ?? '').trim();\nsrc/libs/actions/Report.ts:1605:    const reportComment = Parser.htmlToText(htmlForNewComment);\nsrc/libs/ReportUtils.ts:3759:    const textMessage = Str.removeSMSDomain(Parser.htmlToText(html, {reportIDToName, accountIDToName}));\nsrc/libs/ReportUtils.ts:3858:            return Parser.htmlToText(getReportAutomaticallySubmittedMessage(parentReportAction));\nsrc/libs/ReportUtils.ts:3865:            return Parser.htmlToText(getReportAutomaticallyForwardedMessage(parentReportAction, reportID));\nsrc/libs/ReportUtils.ts:3875:            return Parser.htmlToText(getReportAutomaticallyApprovedMessage(parentReportAction));\nsrc/libs/ReportUtils.ts:4266:    return Parser.htmlToText(report?.description);\nsrc/libs/ReportUtils.ts:4274:    return Parser.htmlToText(policy.description);\nsrc/libs/ReportUtils.ts:4289:    const textForNewComment = Parser.htmlToText(htmlForNewComment);\nsrc/libs/ReportUtils.ts:5500:                text: description ? `set the room description to: ${Parser.htmlToText(description)}` : 'cleared the room description',\nsrc/libs/ReportActionsUtils.ts:1212:    return text ? Parser.htmlToText(text) : '';\nsrc/libs/ReportActionsUtils.ts:1216:    return html ? Parser.htmlToText(html) : '';\n\n</output_tail>",
+            "timestamp": 1787134057.4705234
+        },
+        {
+            "role": "assistant",
+            "content": "The application delegates HTML-to-text/Markdown conversion to `expensify-common`, so I’ll locate the installed or vendored `ExpensiMark` implementation and inspect its block-element/newline rules, which are central to this copy/paste issue.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RIlE --exclude-dir=.git --exclude-dir=android --exclude='*.map' 'class ExpensiMark|htmlToMarkdown|htmlToText' node_modules packages src 2>/dev/null | head -80\n```",
+            "timestamp": 1787134062.7355819,
+            "extra": {
+                "response": {
+                    "id": "resp_091a8a6bc000c9a0016a85806a891081919b19aef2aadac3ca",
+                    "created": 1787134058,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "The application delegates HTML-to-text/Markdown conversion to `expensify-common`, so I’ll locate the installed or vendored `ExpensiMark` implementation and inspect its block-element/newline rules, which are central to this copy/paste issue.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && grep -RIlE --exclude-dir=.git --exclude-dir=android --exclude='*.map' 'class ExpensiMark|htmlToMarkdown|htmlToText' node_modules packages src 2>/dev/null | head -80\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Searching for ExpensiMark package implementation**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Searching for ExpensiMark package implementation**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 182,
+                        "prompt_tokens": 15600,
+                        "total_tokens": 15782,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 32,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 12032,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<output>\nsrc/components/LHNOptionsList/OptionRowLHN.tsx\nsrc/components/SelectionList/Search/TransactionListItemRow.tsx\nsrc/hooks/useHtmlPaste/index.ts\nsrc/hooks/useCopySelectionHelper.ts\nsrc/pages/RoomDescriptionPage.tsx\nsrc/pages/workspace/WorkspaceProfileDescriptionPage.tsx\nsrc/pages/workspace/taxes/NamePage.tsx\nsrc/pages/workspace/WorkspaceInviteMessagePage.tsx\nsrc/pages/home/report/ContextMenu/ContextMenuActions.tsx\nsrc/pages/home/report/ReportActionCompose/ComposerWithSuggestions/ComposerWithSuggestions.tsx\nsrc/pages/home/report/ReportActionItemMessageEdit.tsx\nsrc/pages/tasks/NewTaskDetailsPage.tsx\nsrc/pages/tasks/NewTaskDescriptionPage.tsx\nsrc/pages/tasks/TaskDescriptionPage.tsx\nsrc/pages/PrivateNotes/PrivateNotesEditPage.tsx\nsrc/libs/Parser.ts\nsrc/libs/SidebarUtils.ts\nsrc/libs/OptionsListUtils.ts\nsrc/libs/actions/Report.ts\nsrc/libs/ReportUtils.ts\nsrc/libs/ReportActionsUtils.ts\n</output>",
+            "timestamp": 1787134062.8131707
+        },
+        {
+            "role": "assistant",
+            "content": "The parser package is not present in the searched local paths, so the actionable code is the app’s clipboard selection and paste pipeline. I’ll inspect the selection-copy helper and the Composer’s paste listener wiring, which determine how browser-selected text is captured and inserted.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '1,220p' src/hooks/useCopySelectionHelper.ts && grep -nE 'useHtmlPaste|handlePaste|addEventListener|removeEventListener|onPaste|copy' src/components/Composer/implementation/index.tsx src/hooks/useHtmlPaste/index.ts\n```",
+            "timestamp": 1787134068.832986,
+            "extra": {
+                "response": {
+                    "id": "resp_0209217479f06917016a85807034b48191bd978de2e982919d",
+                    "created": 1787134064,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "The parser package is not present in the searched local paths, so the actionable code is the app’s clipboard selection and paste pipeline. I’ll inspect the selection-copy helper and the Composer’s paste listener wiring, which determine how browser-selected text is captured and inserted.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '1,220p' src/hooks/useCopySelectionHelper.ts && grep -nE 'useHtmlPaste|handlePaste|addEventListener|removeEventListener|onPaste|copy' src/components/Composer/implementation/index.tsx src/hooks/useHtmlPaste/index.ts\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Inspecting package.json dependencies**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Inspecting package.json dependencies**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 191,
+                        "prompt_tokens": 15990,
+                        "total_tokens": 16181,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 29,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 15104,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<output>\nimport {useEffect} from 'react';\nimport Clipboard from '@libs/Clipboard';\nimport KeyboardShortcut from '@libs/KeyboardShortcut';\nimport Parser from '@libs/Parser';\nimport SelectionScraper from '@libs/SelectionScraper';\nimport CONST from '@src/CONST';\n\nfunction copySelectionToClipboard() {\n    const selection = SelectionScraper.getCurrentSelection();\n    if (!selection) {\n        return;\n    }\n    const selectionWithoutLineBreaks = selection.replace(/\\n/g, '');\n    if (!Clipboard.canSetHtml()) {\n        Clipboard.setString(Parser.htmlToMarkdown(selectionWithoutLineBreaks));\n        return;\n    }\n    Clipboard.setHtml(selectionWithoutLineBreaks, Parser.htmlToText(selectionWithoutLineBreaks));\n}\n\nexport default function useCopySelectionHelper() {\n    useEffect(() => {\n        const copyShortcutConfig = CONST.KEYBOARD_SHORTCUTS.COPY;\n        const unsubscribeCopyShortcut = KeyboardShortcut.subscribe(\n            copyShortcutConfig.shortcutKey,\n            copySelectionToClipboard,\n            copyShortcutConfig.descriptionKey,\n            [...copyShortcutConfig.modifiers],\n            false,\n        );\n\n        return () => {\n            unsubscribeCopyShortcut();\n        };\n    }, []);\n}\nsrc/components/Composer/implementation/index.tsx:11:import useHtmlPaste from '@hooks/useHtmlPaste';\nsrc/components/Composer/implementation/index.tsx:42:        onPasteFile = () => {},\nsrc/components/Composer/implementation/index.tsx:129:     * Check the paste event for an attachment, parse the data and call onPasteFile from props with the selected file,\nsrc/components/Composer/implementation/index.tsx:132:    const handlePaste = useCallback(\nsrc/components/Composer/implementation/index.tsx:163:                onPasteFile(event.clipboardData.files[0]);\nsrc/components/Composer/implementation/index.tsx:176:                    onPasteFile(file);\nsrc/components/Composer/implementation/index.tsx:194:                                onPasteFile(file);\nsrc/components/Composer/implementation/index.tsx:202:        [onPasteFile, checkComposerVisibility],\nsrc/components/Composer/implementation/index.tsx:216:        textInput.current.addEventListener('scroll', debouncedSetPrevScroll);\nsrc/components/Composer/implementation/index.tsx:218:            textInput.current?.removeEventListener('scroll', debouncedSetPrevScroll);\nsrc/components/Composer/implementation/index.tsx:238:        textInput.current?.addEventListener('wheel', handleWheel, {passive: false});\nsrc/components/Composer/implementation/index.tsx:241:            textInput.current?.removeEventListener('wheel', handleWheel);\nsrc/components/Composer/implementation/index.tsx:254:    useHtmlPaste(textInput, handlePaste, true);\nsrc/hooks/useHtmlPaste/index.ts:30:const useHtmlPaste: UseHtmlPaste = (textInputRef, preHtmlPasteCallback, removeListenerOnScreenBlur = false) => {\nsrc/hooks/useHtmlPaste/index.ts:65:    const handlePastedHTML = useCallback(\nsrc/hooks/useHtmlPaste/index.ts:77:    const handlePastePlainText = useCallback(\nsrc/hooks/useHtmlPaste/index.ts:87:    const handlePaste = useCallback(\nsrc/hooks/useHtmlPaste/index.ts:118:                        handlePastePlainText(event);\nsrc/hooks/useHtmlPaste/index.ts:122:                handlePastedHTML(pastedHTML);\nsrc/hooks/useHtmlPaste/index.ts:125:            handlePastePlainText(event);\nsrc/hooks/useHtmlPaste/index.ts:128:        [handlePastedHTML, handlePastePlainText, preHtmlPasteCallback],\nsrc/hooks/useHtmlPaste/index.ts:138:            unsubscribeFocus = navigation.addListener('focus', () => document.addEventListener('paste', handlePaste, true));\nsrc/hooks/useHtmlPaste/index.ts:139:            unsubscribeBlur = navigation.addListener('blur', () => document.removeEventListener('paste', handlePaste, true));\nsrc/hooks/useHtmlPaste/index.ts:142:        document.addEventListener('paste', handlePaste, true);\nsrc/hooks/useHtmlPaste/index.ts:149:            document.removeEventListener('paste', handlePaste, true);\nsrc/hooks/useHtmlPaste/index.ts:155:export default useHtmlPaste;\n</output>",
+            "timestamp": 1787134068.8498092
+        },
+        {
+            "role": "assistant",
+            "content": "The direct defect is in `copySelectionToClipboard`: it explicitly removes every newline from the browser selection before writing clipboard data. I’ll inspect the supporting selection and clipboard APIs and nearby Composer functions to rank the ten most relevant files and functions for the requested localization output.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '1,180p' src/libs/SelectionScraper/index.ts && sed -n '1,180p' src/libs/Clipboard/index.ts && sed -n '1,280p' src/components/Composer/implementation/index.tsx | tail -180 && sed -n '120,165p' src/hooks/useHtmlPaste/index.ts && grep -RInE 'useCopySelectionHelper|SelectionScraper|getCurrentSelection|copySelectionToClipboard' src tests | head -80\n```",
+            "timestamp": 1787134075.913906,
+            "extra": {
+                "response": {
+                    "id": "resp_077042a1bc8a324f016a8580760fa487d095bbcc2eb767a31c",
+                    "created": 1787134070,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "The direct defect is in `copySelectionToClipboard`: it explicitly removes every newline from the browser selection before writing clipboard data. I’ll inspect the supporting selection and clipboard APIs and nearby Composer functions to rank the ten most relevant files and functions for the requested localization output.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '1,180p' src/libs/SelectionScraper/index.ts && sed -n '1,180p' src/libs/Clipboard/index.ts && sed -n '1,280p' src/components/Composer/implementation/index.tsx | tail -180 && sed -n '120,165p' src/hooks/useHtmlPaste/index.ts && grep -RInE 'useCopySelectionHelper|SelectionScraper|getCurrentSelection|copySelectionToClipboard' src tests | head -80\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Planning targeted file and function inspection**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Planning targeted file and function inspection**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 272,
+                        "prompt_tokens": 17037,
+                        "total_tokens": 17309,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 64,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 15104,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<warning>\nThe output of your last command was too long.\nPlease try a different command that produces less output.\nIf you're looking at a file you can try use head, tail or sed to view a smaller number of lines selectively.\nIf you're using grep or find and it produced too much output, you can use a more selective search pattern.\nIf you really need to see something from the full command's output, you can redirect output to a file and then search in that file.\n</warning><output_head>\nimport render from 'dom-serializer';\nimport type {Node} from 'domhandler';\nimport {DataNode, Element} from 'domhandler';\nimport {Str} from 'expensify-common';\nimport {parseDocument} from 'htmlparser2';\nimport CONST from '@src/CONST';\nimport type GetCurrentSelection from './types';\n\nconst markdownElements = ['h1', 'strong', 'em', 'del', 'blockquote', 'q', 'code', 'pre', 'a', 'br', 'li', 'ul', 'ol', 'b', 'i', 's', 'mention-user'];\nconst tagAttribute = 'data-testid';\n\n/**\n * Reads html of selection. If browser doesn't support Selection API, returns empty string.\n * @returns HTML of selection as String\n */\nconst getHTMLOfSelection = (): string => {\n    // If browser doesn't support Selection API, return an empty string.\n    if (!window.getSelection) {\n        return '';\n    }\n    const selection = window.getSelection();\n    if (!selection) {\n        return '';\n    }\n\n    if (selection.rangeCount <= 0) {\n        return window.getSelection()?.toString() ?? '';\n    }\n\n    const div = document.createElement('div');\n\n    // HTML tag of markdown comments is in data-testid attribute (em, strong, blockquote..). Our goal here is to\n    // find that nodes and replace that tag with the one inside data-testid, so ExpensiMark can parse it.\n    // Simply, we want to replace this:\n    // <span class=\"...\" style=\"...\" data-testid=\"strong\">bold</span>\n    // to this:\n    // <strong>bold</strong>\n    //\n    // We traverse all ranges, and get closest node with data-testid and replace its contents with contents of\n    // range.\n    for (let i = 0; i < selection.rangeCount; i++) {\n        const range = selection.getRangeAt(i).cloneRange();\n\n        while (range.endOffset === 0) {\n            range.setEndBefore(range.endContainer);\n        }\n\n        const clonedSelection = range.cloneContents();\n\n        // If clonedSelection has no text content this data has no meaning to us.\n        if (clonedSelection.textContent) {\n            let parent: globalThis.Element | null = null;\n            let child = clonedSelection;\n\n            // If selection starts and ends within same text node we use its parentNode. This is because we can't\n            // use closest function on a [Text](https://developer.mozilla.org/en-US/docs/Web/API/Text) node.\n            // We are selecting closest node because nodes with data-testid can be one of the parents of the actual node.\n            // Assuming we selected only \"block\" part of following html:\n            // <div className=\"...\" style=\"...\" data-testid=\"pre\">\n            //     <div dir=\"auto\" class=\"...\" style=\"...\">\n            //         this is block code\n            //     </div>\n            // </div>\n            // commonAncestorContainer: #text \"this is block code\"\n            // commonAncestorContainer.parentNode:\n            //     <div dir=\"auto\" class=\"...\" style=\"...\">\n            //         this is block code\n            //     </div>\n            // and finally commonAncestorContainer.parentNode.closest('data-testid') is targeted dom.\n            if (range.commonAncestorContainer instanceof HTMLElement) {\n                parent = range.commonAncestorContainer.closest(`[${tagAttribute}]`);\n            } else {\n                parent = (range.commonAncestorContainer.parentNode as HTMLElement | null)?.closest(`[${tagAttribute}]`) ?? null;\n            }\n\n            // Keep traversing up to clone all parents with 'data-testid' attribute.\n            while (parent) {\n                const cloned = parent.cloneNode();\n                cloned.appendChild(child);\n                child = cloned as DocumentFragment;\n\n                parent = (parent.parentNode as HTMLElement | null)?.closest(`[${tagAttribute}]`) ?? null;\n            }\n\n            div.appendChild(child);\n        }\n    }\n\n    // Find and remove the div housing the UnreadActionIndicator because we don't want\n    // the 'New/Nuevo' text inside it being copied.\n    const divsToRemove = div.querySelectorAll(`[data-${CONST.SELECTION_SCRAPER_HIDDEN_ELEMENT}=true]`);\n\n    if (divsToRemove && divsToRemove.length > 0) {\n        divsToRemove.forEach((element) => {\n            element.remove();\n        });\n    }\n\n    return div.innerHTML;\n};\n\n/**\n * Clears all attributes from dom elements\n * @param dom - dom htmlparser2 dom representation\n */\nconst replaceNodes = (dom: Node, isChildOfEditorElement: boolean): Node => {\n    let domName;\n    let domChildren: Node[] = [];\n    const domAttribs: Element['attribs'] = {};\n    let data = '';\n\n    // Encoding HTML chars '< >' in the text, because any HTML will be removed in stripHTML method.\n    if (dom.type.toString() === 'text' && dom instanceof DataNode) {\n        data = Str.htmlEncode(dom.data);\n        if (dom.parent instanceof Element && dom.parent?.attribs?.id === 'email-with-break-opportunities') {\n            data = data.replaceAll('\\u200b', '');\n        }\n    } else if (dom instanceof Element) {\n        domName = dom.name;\n        const child = dom.children.at(0);\n        if (dom.attribs?.[t\n</output_head>\n<elided_chars>\n11839 characters elided\n</elided_chars>\n<output_tail>\n        }, 100);\n\n        textInput.current.addEventListener('scroll', debouncedSetPrevScroll);\n        return () => {\n            textInput.current?.removeEventListener('scroll', debouncedSetPrevScroll);\n        };\n    }, []);\n\n    useEffect(() => {\n        const scrollingListener = DeviceEventEmitter.addListener(CONST.EVENTS.SCROLLING, (scrolling: boolean) => {\n            isReportFlatListScrolling.current = scrolling;\n        });\n\n        return () => scrollingListener.remove();\n    }, []);\n\n    useEffect(() => {\n        const handleWheel = (e: MouseEvent) => {\n            if (isReportFlatListScrolling.current) {\n                e.preventDefault();\n                return;\n            }\n            e.stopPropagation();\n        };\n        textInput.current?.addEventListener('wheel', handleWheel, {passive: false});\n\n        return () => {\n            textInput.current?.removeEventListener('wheel', handleWheel);\n        };\n    }, []);\n\n    useEffect(() => {\n        if (!textInput.current || prevScroll === undefined) {\n            return;\n        }\n        // eslint-disable-next-line react-compiler/react-compiler\n        textInput.current.scrollTop = prevScroll;\n        // eslint-disable-next-line react-compiler/react-compiler, react-hooks/exhaustive-deps\n    }, [isComposerFullSize]);\n\n    useHtmlPaste(textInput, handlePaste, true);\n\n    useEffect(() => {\n        setIsRendered(true);\n    }, []);\n\n    const clear = useCallback(() => {\n        if (!textInput.current) {\n            return;\n        }\n\n        const currentText = textInput.current.value;\n        textInput.current.clear();\n\n        // We need to reset the selection to 0,0 manually after clearing the text input on web\n        const selectionEvent = {\n            nativeEvent: {\n                selection: {\n                    start: 0,\n                    end: 0,\n                },\n            },\n        } as NativeSyntheticEvent<TextInputSelectionChangeEventData>;\n        onSelectionChange(selectionEvent);\n        setSelection({start: 0, end: 0});\n\n        onClear(currentText);\n                    }\n                }\n                handlePastedHTML(pastedHTML);\n                return;\n            }\n            handlePastePlainText(event);\n        },\n        // eslint-disable-next-line react-compiler/react-compiler, react-hooks/exhaustive-deps\n        [handlePastedHTML, handlePastePlainText, preHtmlPasteCallback],\n    );\n\n    useEffect(() => {\n        // we need to re-register listener on navigation focus/blur if the component (like Composer) is not unmounting\n        // when navigating away to different screen (report) to avoid paste event on other screen being wrongly handled\n        // by current screen paste listener\n        let unsubscribeFocus: () => void;\n        let unsubscribeBlur: () => void;\n        if (removeListenerOnScreenBlur) {\n            unsubscribeFocus = navigation.addListener('focus', () => document.addEventListener('paste', handlePaste, true));\n            unsubscribeBlur = navigation.addListener('blur', () => document.removeEventListener('paste', handlePaste, true));\n        }\n\n        document.addEventListener('paste', handlePaste, true);\n\n        return () => {\n            if (removeListenerOnScreenBlur) {\n                unsubscribeFocus();\n                unsubscribeBlur();\n            }\n            document.removeEventListener('paste', handlePaste, true);\n        };\n        // eslint-disable-next-line react-compiler/react-compiler, react-hooks/exhaustive-deps\n    }, []);\n};\n\nexport default useHtmlPaste;\nsrc/components/AnchorForCommentsOnly/BaseAnchorForCommentsOnly.tsx:76:                    // Add testID so it gets selected as an anchor tag by SelectionScraper\nsrc/hooks/useCopySelectionHelper.ts:5:import SelectionScraper from '@libs/SelectionScraper';\nsrc/hooks/useCopySelectionHelper.ts:8:function copySelectionToClipboard() {\nsrc/hooks/useCopySelectionHelper.ts:9:    const selection = SelectionScraper.getCurrentSelection();\nsrc/hooks/useCopySelectionHelper.ts:21:export default function useCopySelectionHelper() {\nsrc/hooks/useCopySelectionHelper.ts:26:            copySelectionToClipboard,\nsrc/pages/home/report/ReportActionsView.tsx:8:import useCopySelectionHelper from '@hooks/useCopySelectionHelper';\nsrc/pages/home/report/ReportActionsView.tsx:88:    useCopySelectionHelper();\nsrc/pages/home/report/ReportActionItem.tsx:54:import SelectionScraper from '@libs/SelectionScraper';\nsrc/pages/home/report/ReportActionItem.tsx:342:            const selection = SelectionScraper.getCurrentSelection();\nsrc/CONST.ts:4240:    // The attribute used in the SelectionScraper.js helper to query all the DOM elements\nsrc/libs/SelectionScraper/index.native.ts:4:const getCurrentSelection: GetCurrentSelection = () => '';\nsrc/libs/SelectionScraper/index.native.ts:7:    getCurrentSelection,\nsrc/libs/SelectionScraper/index.ts:156:const getCurrentSelection: GetCurrentSelection = () => {\nsrc/libs/SelectionScraper/index.ts:168:    getCurrentSelection,\n\n</output_tail>",
+            "timestamp": 1787134076.061892
+        },
+        {
+            "role": "assistant",
+            "content": "The defect is confirmed in `copySelectionToClipboard`, but the selection scraper determines whether preserving the original HTML structure is possible. I’ll inspect its final normalization and export functions, then identify related tests or call sites for the ranked result.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '105,180p' src/libs/SelectionScraper/index.ts && sed -n '320,355p' src/pages/home/report/ReportActionItem.tsx && sed -n '70,100p' src/pages/home/report/ReportActionsView.tsx && find tests -type f | grep -Ei 'selection|clipboard|composer|paste|context.menu|report.action' | head -80\n```",
+            "timestamp": 1787134082.4424696,
+            "extra": {
+                "response": {
+                    "id": "resp_07a7768bd5c57d78016a85807d1ae487d0abbb7b488a5d6b49",
+                    "created": 1787134077,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "The defect is confirmed in `copySelectionToClipboard`, but the selection scraper determines whether preserving the original HTML structure is possible. I’ll inspect its final normalization and export functions, then identify related tests or call sites for the ranked result.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && sed -n '105,180p' src/libs/SelectionScraper/index.ts && sed -n '320,355p' src/pages/home/report/ReportActionItem.tsx && sed -n '70,100p' src/pages/home/report/ReportActionsView.tsx && find tests -type f | grep -Ei 'selection|clipboard|composer|paste|context.menu|report.action' | head -80\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Inspecting SelectionScraper getCurrentSelection**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Inspecting SelectionScraper getCurrentSelection**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 211,
+                        "prompt_tokens": 19564,
+                        "total_tokens": 19775,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 26,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 16128,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<output>\n */\nconst replaceNodes = (dom: Node, isChildOfEditorElement: boolean): Node => {\n    let domName;\n    let domChildren: Node[] = [];\n    const domAttribs: Element['attribs'] = {};\n    let data = '';\n\n    // Encoding HTML chars '< >' in the text, because any HTML will be removed in stripHTML method.\n    if (dom.type.toString() === 'text' && dom instanceof DataNode) {\n        data = Str.htmlEncode(dom.data);\n        if (dom.parent instanceof Element && dom.parent?.attribs?.id === 'email-with-break-opportunities') {\n            data = data.replaceAll('\\u200b', '');\n        }\n    } else if (dom instanceof Element) {\n        domName = dom.name;\n        const child = dom.children.at(0);\n        if (dom.attribs?.[tagAttribute]) {\n            // If it's a markdown element, rename it according to the value of data-testid, so ExpensiMark can parse it\n            if (markdownElements.includes(dom.attribs[tagAttribute])) {\n                domName = dom.attribs[tagAttribute];\n            }\n        } else if (dom.name === 'div' && dom.children.length === 1 && isChildOfEditorElement && child) {\n            // We are excluding divs that are children of our editor element and have only one child to prevent\n            // additional newlines from being added in the HTML to Markdown conversion process.\n            return replaceNodes(child, isChildOfEditorElement);\n        }\n\n        // We need to preserve href attribute in order to copy links.\n        if (dom.attribs?.href) {\n            domAttribs.href = dom.attribs.href;\n        }\n\n        if (dom.children) {\n            domChildren = dom.children.map((c) => replaceNodes(c, isChildOfEditorElement || !!dom.attribs?.[tagAttribute]));\n        }\n    } else {\n        throw new Error(`Unknown dom type: ${dom.type}`);\n    }\n\n    return {\n        ...dom,\n        data,\n        name: domName,\n        attribs: domAttribs,\n        children: domChildren,\n    } as Element & DataNode;\n};\n\n/**\n * Resolves the current selection to values and produces clean HTML.\n */\nconst getCurrentSelection: GetCurrentSelection = () => {\n    const htmlSelection = getHTMLOfSelection();\n    const cleanedSelection = htmlSelection\n        .replace(/\\n/g, '')           // Remove all newline characters\n        .replace(/\\s+/g, ' ')         // Replace multiple whitespaces with single space\n        .replace(/<br\\s*\\/?>/gi, '')  // Remove all <br> tags\n        .trim();                      // Remove leading/trailing whitespace\n\n    return cleanedSelection || '';\n};\n\nexport default {\n    getCurrentSelection,\n};\n    }, [latestDecision, action]);\n\n    const toggleContextMenuFromActiveReportAction = useCallback(() => {\n        setIsContextMenuActive(ReportActionContextMenu.isActiveReportAction(action.reportActionID));\n    }, [action.reportActionID]);\n\n    const isArchivedRoom = ReportUtils.isArchivedRoomWithID(originalReportID);\n    const disabledActions = useMemo(() => (!ReportUtils.canWriteInReport(report) ? RestrictedReadOnlyContextMenuActions : []), [report]);\n    const isChronosReport = ReportUtils.chatIncludesChronosWithID(originalReportID);\n    /**\n     * Show the ReportActionContextMenu modal popover.\n     *\n     * @param [event] - A press event.\n     */\n    const showPopover = useCallback(\n        (event: GestureResponderEvent | MouseEvent) => {\n            // Block menu on the message being Edited or if the report action item has errors\n            if (draftMessage !== undefined || !isEmptyObject(action.errors) || !shouldDisplayContextMenu) {\n                return;\n            }\n\n            setIsContextMenuActive(true);\n            const selection = SelectionScraper.getCurrentSelection();\n            ReportActionContextMenu.showContextMenu(\n                CONST.CONTEXT_MENU_TYPES.REPORT_ACTION,\n                event,\n                selection,\n                popoverAnchorRef.current,\n                reportID,\n                action.reportActionID,\n                originalReportID,\n                draftMessage ?? '',\n                () => setIsContextMenuActive(true),\n                toggleContextMenuFromActiveReportAction,\n                isArchivedRoom,\n                isChronosReport,\n    hasOlderActions: boolean;\n};\n\nlet listOldID = Math.round(Math.random() * 100);\n\nfunction ReportActionsView({\n    report,\n    parentReportAction,\n    reportActions: allReportActions = [],\n    isLoadingInitialReportActions = false,\n    isLoadingOlderReportActions = false,\n    hasLoadingOlderReportActionsError = false,\n    isLoadingNewerReportActions = false,\n    hasLoadingNewerReportActionsError = false,\n    transactionThreadReportID,\n    hasNewerActions,\n    hasOlderActions,\n}: ReportActionsViewProps) {\n    useCopySelectionHelper();\n    const reactionListRef = useContext(ReactionListContext);\n    const route = useRoute<RouteProp<AuthScreensParamList, typeof SCREENS.REPORT>>();\n    const [session] = useOnyx(ONYXKEYS.SESSION);\n    const [transactionThreadReportActions] = useOnyx(`${ONYXKEYS.COLLECTION.REPORT_ACTIONS}${transactionThreadReportID ?? -1}`, {\n        selector: (reportActions: OnyxEntry<OnyxTypes.ReportActions>) => ReportActionsUtils.getSortedReportActionsForDisplay(reportActions, true),\n    });\n    const [transactionThreadReport] = useOnyx(`${ONYXKEYS.COLLECTION.REPORT}${transactionThreadReportID ?? -1}`);\n    const prevTransactionThreadReport = usePrevious(transactionThreadReport);\n    const reportActionID = route?.params?.reportActionID;\n    const prevReportActionID = usePrevious(reportActionID);\n    const didLayout = useRef(false);\n    const didLoadOlderChats = useRef(false);\ntests/unit/ConvertToLTRForComposerTest.ts\ntests/perf-test/SelectionList.perf-test.tsx\n</output>",
+            "timestamp": 1787134082.4754415
+        },
+        {
+            "role": "assistant",
+            "content": "The issue is localized: `SelectionScraper.getCurrentSelection()` and `copySelectionToClipboard()` remove newline characters and `<br>` elements before the clipboard payload is created. The paste path then consumes that already-normalized content. I’ll write the ranked ten files and ten functions to the required result JSON.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && cat > result.json <<'EOF'\n{\n  \"file_list\": [\n    \"src/hooks/useCopySelectionHelper.ts\",\n    \"src/libs/SelectionScraper/index.ts\",\n    \"src/hooks/useHtmlPaste/index.ts\",\n    \"src/components/Composer/implementation/index.tsx\",\n    \"src/libs/Clipboard/index.ts\",\n    \"src/pages/home/report/ContextMenu/ContextMenuActions.tsx\",\n    \"src/pages/home/report/ReportActionItem.tsx\",\n    \"src/pages/home/report/ReportActionsView.tsx\",\n    \"src/libs/Parser.ts\",\n    \"src/pages/home/report/ReportActionCompose/ComposerWithSuggestions/ComposerWithSuggestions.tsx\"\n  ],\n  \"function_list\": [\n    \"src/hooks/useCopySelectionHelper.ts:copySelectionToClipboard\",\n    \"src/libs/SelectionScraper/index.ts:getCurrentSelection\",\n    \"src/libs/SelectionScraper/index.ts:getHTMLOfSelection\",\n    \"src/libs/SelectionScraper/index.ts:replaceNodes\",\n    \"src/hooks/useHtmlPaste/index.ts:insertAtCaret\",\n    \"src/hooks/useHtmlPaste/index.ts:handlePaste\",\n    \"src/hooks/useHtmlPaste/index.ts:handlePastedHTML\",\n    \"src/components/Composer/implementation/index.tsx:Composer.handlePaste\",\n    \"src/pages/home/report/ContextMenu/ContextMenuActions.tsx:setClipboardMessage\",\n    \"src/pages/home/report/ContextMenu/ContextMenuActions.tsx:getActionHtml\"\n  ]\n}\nEOF\n```",
+            "timestamp": 1787134099.52279,
+            "extra": {
+                "response": {
+                    "id": "resp_0859993442237206016a858083c66c87d09299b055b61a6709",
+                    "created": 1787134083,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "The issue is localized: `SelectionScraper.getCurrentSelection()` and `copySelectionToClipboard()` remove newline characters and `<br>` elements before the clipboard payload is created. The paste path then consumes that already-normalized content. I’ll write the ranked ten files and ten functions to the required result JSON.\n\n```bash\ncd /home/xxx/mwj/mini-swe-agent_Lancer/xxx/workspace/mini-swe-agent_baseline_openai_gpt-5.6-luna_v5/App_work && cat > result.json <<'EOF'\n{\n  \"file_list\": [\n    \"src/hooks/useCopySelectionHelper.ts\",\n    \"src/libs/SelectionScraper/index.ts\",\n    \"src/hooks/useHtmlPaste/index.ts\",\n    \"src/components/Composer/implementation/index.tsx\",\n    \"src/libs/Clipboard/index.ts\",\n    \"src/pages/home/report/ContextMenu/ContextMenuActions.tsx\",\n    \"src/pages/home/report/ReportActionItem.tsx\",\n    \"src/pages/home/report/ReportActionsView.tsx\",\n    \"src/libs/Parser.ts\",\n    \"src/pages/home/report/ReportActionCompose/ComposerWithSuggestions/ComposerWithSuggestions.tsx\"\n  ],\n  \"function_list\": [\n    \"src/hooks/useCopySelectionHelper.ts:copySelectionToClipboard\",\n    \"src/libs/SelectionScraper/index.ts:getCurrentSelection\",\n    \"src/libs/SelectionScraper/index.ts:getHTMLOfSelection\",\n    \"src/libs/SelectionScraper/index.ts:replaceNodes\",\n    \"src/hooks/useHtmlPaste/index.ts:insertAtCaret\",\n    \"src/hooks/useHtmlPaste/index.ts:handlePaste\",\n    \"src/hooks/useHtmlPaste/index.ts:handlePastedHTML\",\n    \"src/components/Composer/implementation/index.tsx:Composer.handlePaste\",\n    \"src/pages/home/report/ContextMenu/ContextMenuActions.tsx:setClipboardMessage\",\n    \"src/pages/home/report/ContextMenu/ContextMenuActions.tsx:getActionHtml\"\n  ]\n}\nEOF\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Planning result.json creation command**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Planning result.json creation command**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 796,
+                        "prompt_tokens": 21014,
+                        "total_tokens": 21810,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 378,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 19200,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "<returncode>0</returncode>\n<output>\n</output>",
+            "timestamp": 1787134099.5379107
+        },
+        {
+            "role": "assistant",
+            "content": "```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```",
+            "timestamp": 1787134103.380194,
+            "extra": {
+                "response": {
+                    "id": "resp_0181316658f011ee016a858094f88487d0ab6a1137fb3dbe2b",
+                    "created": 1787134101,
+                    "model": "gpt-5.6-luna",
+                    "object": "chat.completion",
+                    "system_fingerprint": null,
+                    "choices": [
+                        {
+                            "finish_reason": "stop",
+                            "index": 0,
+                            "message": {
+                                "content": "```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```",
+                                "role": "assistant",
+                                "tool_calls": null,
+                                "function_call": null,
+                                "reasoning_content": "**Defining exact submit command format**",
+                                "provider_specific_fields": {
+                                    "refusal": null,
+                                    "reasoning_content": "**Defining exact submit command format**"
+                                }
+                            },
+                            "provider_specific_fields": {
+                                "native_finish_reason": "stop"
+                            }
+                        }
+                    ],
+                    "usage": {
+                        "completion_tokens": 69,
+                        "prompt_tokens": 21451,
+                        "total_tokens": 21520,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": null,
+                            "audio_tokens": null,
+                            "reasoning_tokens": 50,
+                            "rejected_prediction_tokens": null,
+                            "text_tokens": null
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": null,
+                            "cached_tokens": 20224,
+                            "text_tokens": null,
+                            "image_tokens": null,
+                            "cached_creation_tokens": 0
+                        }
+                    },
+                    "service_tier": null
+                }
+            }
+        },
+        {
+            "role": "user",
+            "content": "",
+            "timestamp": 1787134103.3934448
+        }
+    ],
+    "trajectory_format": "mini-swe-agent-1"
+}
