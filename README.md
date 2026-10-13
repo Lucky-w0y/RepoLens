@@ -90,9 +90,3 @@ Data for experiments on the SWE-Pro-Loc benchmark.
 - **gold.json**: the ground-truth annotations linking issues to relevant files/functions.  
 - **sampled_issue_ids.json**: the sampled issue IDs selected for evaluation.  
 - **workspace/**: intermediate runtime artifacts and cached results produced during localization.  
-
-
-## Additional Results for RQ2 (Model Generalization)
-To further evaluate the generalization capability of RepoLens, we additionally report the Recall@10 metric for RQ2 at both the file level and the function level.
-All corresponding results are provided in the RQ2_Generalizability/recall@10_results/ folder for reference.
-
